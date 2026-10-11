@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cake Couture - Receita Exclusiva Prestígio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4A2E35;
+            --primary-light: #6E444F;
+            --accent: #D4AF37;
+            --bg-color: #FDFBF9;
+            --card-bg: #FFFFFF;
+            --text-main: #3E383B;
+            --text-muted: #7A6F73;
+            --border-color: #EFE6E8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(74, 46, 53, 0.08);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        header {
+            background: linear-gradient(135deg, #4A2E35 0%, #2A191D 100%);
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .brand-subtitle {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .recipe-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .yield-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: #F7EFF2;
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 30px;
+            border: 1px solid rgba(74, 46, 53, 0.15);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        @media (min-width: 600px) {
+            .ingredients-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .ingredient-item {
+            background-color: var(--bg-color);
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .ingredient-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            border-color: var(--primary-light);
+        }
+
+        .ingredient-name {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .ingredient-measure {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .ingredient-note {
+            grid-column: 1 / -1;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 0 4px;
+        }
+
+        .steps-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            position: relative;
+            padding-left: 55px;
+            margin-bottom: 25px;
+        }
+
+        .step-item::before {
+            counter-increment: step-counter;
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 38px;
+            height: 38px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(74, 46, 53, 0.2);
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 4px;
+            font-size: 1.05rem;
+        }
+
+        .step-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .footer-note {
+            margin-top: 40px;
+            background: linear-gradient(to right, #F7EFF2, #FDFBF9);
+            padding: 24px;
+            border-radius: 16px;
+            border-left: 4px solid var(--accent);
+            text-align: center;
+        }
+
+        .footer-note p {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Botão de Voltar -->
+<div style="margin-bottom: 1rem;">
+    <button onclick="history.back()" style="background-color: #92400e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+        &larr; Voltar
+    </button>
+</div>
+
+    <div class="container">
+        <header>
+            <div class="brand-subtitle">Cake Couture • Alta Confeitaria</div>
+            <h1>Receita Exclusiva</h1>
+            <div class="recipe-title">Bolo de Pote Prestígio (Massa de Chocolate + Coco + Brigadeiro)</div>
+        </header>
+
+        <div class="content">
+            <div class="yield-badge">
+                ✨ Rendimento ideal: Aprox. 10 potinhos
+            </div>
+
+            <section>
+                <h2 class="section-title">1. Recheio Cremoso de Coco (Beijinho)</h2>
+                <div class="ingredients-grid">
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Leite condensado</span>
+                        <span class="ingredient-measure">1 lata (395g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Creme de leite</span>
+                        <span class="ingredient-measure">1 caixinha (200g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Leite de coco</span>
+                        <span class="ingredient-measure">100 ml</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Coco ralado (fino ou médio)</span>
+                        <span class="ingredient-measure">50g (½ xícara)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Manteiga sem sal</span>
+                        <span class="ingredient-measure">1 colher (sopa)</span>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-title">2. Brigadeiro Cremoso de Chocolate</h2>
+                <div class="ingredients-grid">
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Leite condensado</span>
+                        <span class="ingredient-measure">1 lata (395g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Creme de leite</span>
+                        <span class="ingredient-measure">1 caixinha (200g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Chocolate em pó (50% cacau)</span>
+                        <span class="ingredient-measure">3 colheres (sopa)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Manteiga sem sal</span>
+                        <span class="ingredient-measure">1 colher (sopa)</span>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-title">Modo de Preparo e Montagem</h2>
+                <ol class="steps-list">
+                    <li class="step-item">
+                        <div class="step-title">Prepare os recheios</div>
+                        <div class="step-desc">Em panela separadas, misture os ingredientes de cada recheio. Leve ao fogo médio, mexendo sempre até soltar do fundo da panela (ponto de colher/cremoso, mais mole que ponto de enrolar). Cubra com plástico filme em contato e reserve.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Asse a massa de chocolate</div>
+                        <div class="step-desc">Utilize a massa de chocolate base da Cake Couture assada em forma de 20x30 cm. Espere esfriar completamente antes de cortar em discos ou esfarelar.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Calda de umectação (Opcional)</div>
+                        <div class="step-desc">Misture 100ml de leite integral com 2 colheres de sopa de leite condensado para umedecer levemente as camadas de massa, se desejar.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Montagem em camadas</div>
+                        <div class="step-desc">No potinho, alterne camadas de massa de chocolate, o creme cremoso de coco e o brigadeiro de chocolate. Repita até o topo do pote.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Finalização de Luxo</div>
+                        <div class="step-desc">Decore a última camada com um toque de coco ralado ou raspas de chocolate nobre para valorizar a apresentação da Cake Couture.</div>
+                    </li>
+                </ol>
+            </section>
+
+            <div class="footer-note">
+                <p>O Prestígio é um clássico absoluto de vendas! 🥥🍫 Sucesso garantido no cardápio da Cake Couture.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

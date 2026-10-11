@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cake Couture - Receita Exclusiva Creme de Ninho</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8C5367;
+            --primary-light: #B4788C;
+            --accent: #D4AF37;
+            --bg-color: #FDFBF9;
+            --card-bg: #FFFFFF;
+            --text-main: #3E383B;
+            --text-muted: #7A6F73;
+            --border-color: #EFE6E8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(140, 83, 103, 0.08);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        header {
+            background: linear-gradient(135deg, #8C5367 0%, #633344 100%);
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .brand-subtitle {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .recipe-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .yield-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: #F7EFF2;
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 30px;
+            border: 1px solid rgba(140, 83, 103, 0.15);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        @media (min-width: 600px) {
+            .ingredients-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .ingredient-item {
+            background-color: var(--bg-color);
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .ingredient-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            border-color: var(--primary-light);
+        }
+
+        .ingredient-name {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .ingredient-measure {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .ingredient-note {
+            grid-column: 1 / -1;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 0 4px;
+        }
+
+        .steps-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            position: relative;
+            padding-left: 55px;
+            margin-bottom: 25px;
+        }
+
+        .step-item::before {
+            counter-increment: step-counter;
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 38px;
+            height: 38px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(140, 83, 103, 0.2);
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 4px;
+            font-size: 1.05rem;
+        }
+
+        .step-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .footer-note {
+            margin-top: 40px;
+            background: linear-gradient(to right, #F7EFF2, #FDFBF9);
+            padding: 24px;
+            border-radius: 16px;
+            border-left: 4px solid var(--accent);
+            text-align: center;
+        }
+
+        .footer-note p {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Botão de Voltar -->
+<div style="margin-bottom: 1rem;">
+    <button onclick="history.back()" style="background-color: #92400e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+        &larr; Voltar
+    </button>
+</div>
+
+    <div class="container">
+        <header>
+            <div class="brand-subtitle">Cake Couture • Alta Confeitaria</div>
+            <h1>Receita Exclusiva</h1>
+            <div class="recipe-title">Creme de Ninho Aveludado para Bolos de Pote</div>
+        </header>
+
+        <div class="content">
+            <div class="yield-badge">
+                ✨ Rendimento ideal: Recheio completo para os potinhos da linha
+            </div>
+
+            <section>
+                <h2 class="section-title">Ingredientes do Creme</h2>
+                <div class="ingredients-grid">
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Leite condensado</span>
+                        <span class="ingredient-measure">1 lata / caixinha (395g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Creme de leite (gelado ou caixinha normal)</span>
+                        <span class="ingredient-measure">1 caixinha (200g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Leite em pó (Ninho de preferência)</span>
+                        <span class="ingredient-measure">1 xícara (chá) ou 100g</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Manteiga sem sal (ponto de pomada)</span>
+                        <span class="ingredient-measure">1 colher (sopa) ou 20g</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Chocolate branco nobre (opcional para estruturar)</span>
+                        <span class="ingredient-measure">90g (derretido)</span>
+                    </div>
+                    <div class="ingredient-note">
+                        💡 Dica profissional: Se preferir fazer na panela (ponto brigadeiro de colher), junte os ingredientes e mexa em fogo médio até soltar levemente do fundo. Se preferir a versão batida ultracremosa, veja o modo de preparo abaixo.
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-title">Modo de Preparo (Versão Panela - Ponto Perfeito para Potes)</h2>
+                <ol class="steps-list">
+                    <li class="step-item">
+                        <div class="step-title">Mistura inicial a frio</div>
+                        <div class="step-desc">Com o fogo ainda desligado, em uma panela de fundo grosso, coloque o leite condensado e peneire todo o leite em pó. Mexa bem com um batedor de arame (fouet) até dissolver completamente e não restar nenhum gruminho.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Agregue os demais ingredientes</div>
+                        <div class="step-desc">Acrescente o creme de leite, a manteiga sem sal e, se optar por usar o chocolate branco derretido para dar uma estrutura extra firme, adicione-o agora. Misture bem.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Cozimento cuidadoso</div>
+                        <div class="step-desc">Ligue em fogo médio e mexa sem parar (fazendo movimentos circulares e cobrindo todo o fundo da panela) para o creme não grudar ou queimar.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Ponto ideal de colher</div>
+                        <div class="step-desc">Assim que a mistura começar a borbulhar forte e encorpar — caindo da espátula em blocos cremosos (ponto de brigadeiro mole/colher), desligue o fogo. Ele não deve soltar totalmente da panela como o brigadeiro de enrolar, pois endurece um pouco ao esfriar.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Descanso e Conservação</div>
+                        <div class="step-desc">Transfira o creme para uma tigela, cubra com plástico filme **em contato direto** com a superfície do creme para evitar que crie película e leve à geladeira por pelo menos 2 horas antes de usar na montagem dos potinhos da Cake Couture.</div>
+                    </li>
+                </ol>
+            </section>
+
+            <div class="footer-note">
+                <p>O Creme de Ninho é o queridinho dos clientes! 👑 Perfeito para combinar com a massa de leite em pó ou equilibrar com a nossa massa de chocolate intensa.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

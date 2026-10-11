@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Fantasy World Map - Jogo Interativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Special+Elite&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cinzel: ['Cinzel', 'serif'],
+                        elite: ['Special Elite', 'cursive'],
+                        fell: ['IM Fell English SC', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #2b221e;
+            color: #2c221e;
+            font-family: 'Special Elite', cursive;
+        }
+
+        .parchment-texture {
+            background-color: #dfceb2;
+            background-image: radial-gradient(circle at 50% 50%, rgba(200, 169, 126, 0.4) 0%, rgba(130, 95, 60, 0.6) 100%),
+                              url("https://images.unsplash.com/photo-1532153975070-2e9ab71f1b14?auto=format&fit=crop&w=1500&q=80");
+            background-blend-mode: multiply;
+            box-shadow: inset 0 0 80px rgba(70, 45, 25, 0.7);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #d4c3a3;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8c6d46;
+            border-radius: 4px;
+        }
+
+        .region-marker {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .region-marker:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+            filter: drop-shadow(0 0 10px #b45309);
+            z-index: 50;
+        }
+
+        .compass-rose:hover {
+            transform: rotate(45deg);
+            transition: transform 1s ease-in-out;
+        }
+
+        .vignette {
+            box-shadow: inset 0 0 100px rgba(44, 34, 30, 0.8);
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden select-none">
+
+    <header class="bg-[#1f1714] text-[#e6d5b8] px-6 py-3 border-b-4 border-[#8c6d46] flex items-center justify-between shadow-lg z-30 flex-shrink-0">
+        <div class="flex items-center space-x-4">
+            <i class="fa-solid fa-map-marked-alt text-2xl text-amber-600 animate-pulse"></i>
+            <div>
+                <h1 class="font-cinzel text-lg md:text-2xl font-black tracking-widest text-[#f5ebd8]">THE FANTASY WORLD MAP</h1>
+                <p class="text-xs font-elite text-amber-200/70">Charted by Dan Meth • Interactive RPG Edition</p>
+            </div>
+        </div>
+
+        <div class="hidden md:flex items-center space-x-6 text-sm font-elite">
+            <div class="bg-[#2c221e] px-3 py-1.5 rounded border border-[#8c6d46] flex items-center space-x-2">
+                <i class="fa-solid fa-compass text-amber-500"></i>
+                <span id="coord-display" class="text-amber-100">Coordenadas: --, --</span>
+            </div>
+            <div class="bg-[#2c221e] px-3 py-1.5 rounded border border-[#8c6d46] flex items-center space-x-2">
+                <i class="fa-solid fa-scroll text-amber-500"></i>
+                <span id="discovered-count" class="text-amber-100">Descobertas: 0 / 22</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <button onclick="toggleSound()" id="sound-btn" class="bg-[#3a2c26] hover:bg-[#4a3932] text-amber-200 px-3 py-1.5 rounded border border-[#8c6d46] text-xs font-elite transition flex items-center space-x-1">
+                <i class="fa-solid fa-volume-high"></i>
+                <span class="hidden sm:inline">Som: On</span>
+            </button>
+            <button onclick="openQuestLog()" class="bg-amber-700 hover:bg-amber-600 text-amber-100 px-4 py-1.5 rounded border border-amber-500 text-xs font-cinzel font-bold shadow transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-book-journal-whills"></i>
+                <span>Diário</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 relative overflow-auto flex items-center justify-center p-4 md:p-8 vignette" id="map-container">
+        <div id="world-map" class="relative w-[1400px] h-[1050px] parchment-texture rounded-xl border-8 border-[#4a3728] shadow-2xl flex-shrink-0 cursor-grab active:cursor-grabbing">
+            
+            <div class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#2c221e_1px,transparent_1px)] [background-size:24px_24px]"></div>
+
+            <div class="absolute top-8 left-1/2 transform -translate-x-1/2 text-center pointer-events-none z-10">
+                <h2 class="font-cinzel text-3xl md:text-5xl font-black tracking-widest text-[#2c221e] drop-shadow-sm uppercase">The Fantasy World Map</h2>
+                <p class="font-elite text-xs md:text-sm text-[#5c4436] tracking-wider mt-1 italic">charted by Dan Meth • Interactive Edition</p>
+            </div>
+
+            <div class="absolute bottom-12 right-12 w-32 h-32 md:w-40 md:h-40 pointer-events-none z-10 opacity-80 compass-rose transition-transform duration-700">
+                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                    <polygon points="50,2 54,40 50,50" fill="#2c221e"/>
+                    <polygon points="50,98 54,60 50,50" fill="#2c221e"/>
+                    <polygon points="2,50 40,54 50,50" fill="#2c221e"/>
+                    <polygon points="98,50 60,54 50,50" fill="#2c221e"/>
+                    <polygon points="50,50 25,25 45,45" fill="#8c6d46"/>
+                    <polygon points="50,50 75,75 55,55" fill="#8c6d46"/>
+                    <polygon points="50,50 75,25 55,45" fill="#8c6d46"/>
+                    <polygon points="50,50 25,75 45,55" fill="#8c6d46"/>
+                    <circle cx="50" cy="50" r="48" fill="none" stroke="#2c221e" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="44" fill="none" stroke="#2c221e" stroke-width="1" stroke-dasharray="2,2"/>
+                    <text x="47" y="12" font-family="Cinzel" font-size="10" font-weight="bold" fill="#2c221e">N</text>
+                    <text x="48" y="96" font-family="Cinzel" font-size="10" font-weight="bold" fill="#2c221e">S</text>
+                    <text x="4" y="53" font-family="Cinzel" font-size="10" font-weight="bold" fill="#2c221e">W</text>
+                    <text x="90" y="53" font-family="Cinzel" font-size="10" font-weight="bold" fill="#2c221e">E</text>
+                </svg>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 10%; left: 12%;" onclick="exploreRegion('krull')">
+                <div class="font-cinzel font-bold text-sm text-[#3d2d25] drop-shadow tracking-wider group-hover:text-amber-800 transition">Krull</div>
+                <div class="w-3 h-3 bg-amber-900 rounded-full border border-amber-200 mt-1 mx-auto animate-pulse"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 15%; left: 21%;" onclick="exploreRegion('oz')">
+                <div class="font-cinzel font-bold text-2xl text-[#2c221e] drop-shadow tracking-widest group-hover:text-amber-800 transition">Oz</div>
+                <div class="font-elite text-[10px] text-[#5c4436] font-bold">Emerald City</div>
+                <div class="w-3.5 h-3.5 bg-emerald-700 rounded-full border border-amber-200 mt-1 mx-auto shadow-md"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 10%; left: 47%;" onclick="exploreRegion('narnia')">
+                <div class="font-elite text-[10px] text-[#5c4436] italic">The Wardrobe</div>
+                <div class="font-cinzel font-black text-3xl text-[#2c221e] drop-shadow tracking-wider group-hover:text-amber-800 transition">Narnia</div>
+                <div class="w-4 h-4 bg-amber-950 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 8%; left: 71%;" onclick="exploreRegion('neverneverland')">
+                <div class="font-cinzel font-bold text-xl text-[#2c221e] drop-shadow tracking-wide group-hover:text-amber-800 transition">Never<br>Neverland</div>
+                <div class="w-3.5 h-3.5 bg-amber-900 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 18%; left: 85%;" onclick="exploreRegion('westeros')">
+                <div class="font-cinzel font-black text-3xl text-[#2c221e] drop-shadow tracking-widest group-hover:text-amber-800 transition">Westeros</div>
+                <div class="font-elite text-[10px] text-[#5c4436]">The Seven Kingdoms</div>
+                <div class="w-4 h-4 bg-red-950 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 33%; left: 25%;" onclick="exploreRegion('middleearth')">
+                <div class="font-elite text-[10px] text-[#5c4436] mb-[-2px]">The Shire</div>
+                <div class="font-cinzel font-black text-3xl md:text-4xl text-[#2c221e] drop-shadow tracking-wider group-hover:text-amber-800 transition">Middle<br>Earth</div>
+                <div class="font-elite text-[11px] text-[#5c4436] mt-1 italic tracking-widest">Mordor</div>
+                <div class="w-5 h-5 bg-amber-800 rounded-full border-2 border-amber-200 mt-2 mx-auto shadow-lg"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 35%; left: 52%;" onclick="exploreRegion('wonderland')">
+                <div class="font-cinzel font-black text-3xl text-[#2c221e] drop-shadow tracking-wide group-hover:text-amber-800 transition">Wonderland</div>
+                <div class="w-4 h-4 bg-purple-900 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 35%; left: 70%;" onclick="exploreRegion('lilliput')">
+                <div class="font-cinzel font-bold text-xl text-[#2c221e] drop-shadow tracking-wide group-hover:text-amber-800 transition">Lilliput</div>
+                <div class="w-3 h-3 bg-amber-900 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 52%; left: 10%;" onclick="exploreRegion('dinotopia')">
+                <div class="font-cinzel font-bold text-2xl text-[#2c221e] drop-shadow tracking-wide group-hover:text-amber-800 transition">Dinotopia</div>
+                <div class="font-elite text-[9px] text-[#5c4436]">Where The Wild Things Are</div>
+                <div class="w-4 h-4 bg-emerald-900 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 56%; left: 32%;" onclick="exploreRegion('moominvalley')">
+                <div class="font-elite text-[9px] text-[#5c4436]">Hattifattener's Island</div>
+                <div class="font-cinzel font-bold text-2xl text-[#2c221e] drop-shadow tracking-wide group-hover:text-amber-800 transition">Moomin<br>Valley</div>
+                <div class="w-4 h-4 bg-sky-900 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 48%; left: 54%;" onclick="exploreRegion('whoville')">
+                <div class="font-cinzel font-bold text-xl text-[#2c221e] drop-shadow tracking-wide group-hover:text-amber-800 transition">Whoville</div>
+                <div class="font-elite text-[10px] text-[#5c4436] mt-1">Solla Sollew</div>
+                <div class="w-3.5 h-3.5 bg-amber-900 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 55%; left: 48%;" onclick="exploreRegion('terabithia')">
+                <div class="font-cinzel font-bold text-2xl text-[#2c221e] drop-shadow tracking-widest group-hover:text-amber-800 transition">Terabithia</div>
+                <div class="w-4 h-4 bg-green-900 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 58%; left: 66%;" onclick="exploreRegion('sodor')">
+                <div class="font-cinzel font-bold text-2xl text-[#2c221e] drop-shadow tracking-wider group-hover:text-amber-800 transition">Sodor</div>
+                <div class="font-elite text-[9px] text-[#5c4436]">Living Island • Lidsville</div>
+                <div class="w-4 h-4 bg-blue-950 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 66%; left: 60%;" onclick="exploreRegion('hyrule')">
+                <div class="font-cinzel font-black text-3xl text-[#2c221e] drop-shadow tracking-widest group-hover:text-amber-800 transition">Hyrule</div>
+                <div class="w-4 h-4 bg-amber-700 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 48%; left: 78%;" onclick="exploreRegion('utopia')">
+                <div class="font-cinzel font-bold text-xl text-[#2c221e] drop-shadow tracking-wide group-hover:text-amber-800 transition">Utopia</div>
+                <div class="w-3 h-3 bg-amber-900 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 66%; left: 85%;" onclick="exploreRegion('earthsea')">
+                <div class="font-cinzel font-black text-2xl text-[#2c221e] drop-shadow tracking-wider group-hover:text-amber-800 transition">Earth-Sea</div>
+                <div class="w-4 h-4 bg-teal-900 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 74%; left: 25%;" onclick="exploreRegion('fantasia')">
+                <div class="font-cinzel font-black text-4xl text-[#2c221e] drop-shadow tracking-widest group-hover:text-amber-800 transition">Fantasia</div>
+                <div class="w-5 h-5 bg-indigo-950 rounded-full border-2 border-amber-200 mt-2 mx-auto shadow-lg"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 70%; left: 50%;" onclick="exploreRegion('thra')">
+                <div class="font-cinzel font-black text-3xl text-[#2c221e] drop-shadow tracking-wider group-hover:text-amber-800 transition">Thra</div>
+                <div class="font-elite text-[11px] text-[#5c4436] mt-1 italic">Labyrinth</div>
+                <div class="w-4 h-4 bg-amber-900 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 79%; left: 55%;" onclick="exploreRegion('kadath')">
+                <div class="font-cinzel font-bold text-2xl text-[#2c221e] drop-shadow tracking-wider group-hover:text-amber-800 transition">Kadath</div>
+                <div class="w-4 h-4 bg-stone-800 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 86%; left: 12%;" onclick="exploreRegion('nehwon')">
+                <div class="font-elite text-[9px] text-[#5c4436]">Land Of The Lost</div>
+                <div class="font-cinzel font-bold text-xl text-[#2c221e] drop-shadow tracking-wide group-hover:text-amber-800 transition">Lankhmar</div>
+                <div class="font-cinzel font-black text-2xl text-[#2c221e] drop-shadow tracking-wider mt-1">Nehwon</div>
+                <div class="w-4 h-4 bg-amber-950 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 90%; left: 36%;" onclick="exploreRegion('dreamlands')">
+                <div class="font-cinzel font-black text-3xl text-[#2c221e] drop-shadow tracking-widest group-hover:text-amber-800 transition">Dreamlands</div>
+                <div class="w-4 h-4 bg-violet-950 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+            <div class="region-marker cursor-pointer group z-25 text-center" style="top: 92%; left: 72%;" onclick="exploreRegion('avalon')">
+                <div class="font-cinzel font-bold text-2xl text-[#2c221e] drop-shadow tracking-wide group-hover:text-amber-800 transition">Avalon</div>
+                <div class="font-elite text-[10px] text-[#5c4436] italic">Camelot</div>
+                <div class="font-cinzel font-black text-2xl text-[#2c221e] drop-shadow tracking-wider mt-1">Florin</div>
+                <div class="w-4 h-4 bg-yellow-900 rounded-full border border-amber-200 mt-1 mx-auto"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="region-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#f5ebd8] text-[#2c221e] w-full max-w-2xl rounded-lg border-4 border-[#5c4436] shadow-2xl overflow-hidden relative">
+            <div class="bg-[#3a2c26] text-[#f5ebd8] px-6 py-4 flex items-center justify-between border-b-2 border-[#8c6d46]">
+                <div class="flex items-center space-x-3">
+                    <i id="modal-icon" class="fa-solid fa-fort-awesome text-2xl text-amber-500"></i>
+                    <h3 id="modal-title" class="font-cinzel text-2xl font-black tracking-wider">Nome da Região</h3>
+                </div>
+                <button onclick="closeModal()" class="text-amber-300 hover:text-white text-xl p-1 rounded transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-6 md:p-8 space-y-6 parchment-texture">
+                <div class="flex flex-col md:flex-row gap-6 items-center">
+                    <div class="w-full md:w-1/2 h-48 bg-[#d4c3a3] rounded-md border-2 border-[#8c6d46] overflow-hidden shadow-inner relative flex items-center justify-center">
+                        <img id="modal-img" src="" alt="Região" class="w-full h-full object-cover filter sepia-[0.3]" onerror="this.src='https://placehold.co/400x300/c9b18c/2c221e?text=Fantasy+Realm'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-3">
+                            <span id="modal-subtitle" class="font-elite text-xs text-amber-100 bg-black/60 px-2 py-1 rounded">Local Legendário</span>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 space-y-3">
+                        <h4 class="font-cinzel font-bold text-amber-950 text-lg border-b border-amber-900/30 pb-1">Lore do Universo</h4>
+                        <p id="modal-desc" class="font-elite text-sm text-[#42342f] leading-relaxed">Descrição detalhada da região...</p>
+                    </div>
+                </div>
+
+                <div class="bg-[#ecdcc2] p-4 rounded-md border border-[#8c6d46] space-y-2">
+                    <h5 class="font-cinzel font-bold text-xs text-amber-950 uppercase tracking-widest flex items-center space-x-2">
+                        <i class="fa-solid fa-dice-d20 text-amber-700"></i>
+                        <span>Missão de Aventura / Desafio</span>
+                    </h5>
+                    <p id="modal-quest" class="font-elite text-xs text-[#52413a] italic">Carregando missão...</p>
+                </div>
+
+                <div class="flex justify-end space-x-4 pt-2">
+                    <button onclick="closeModal()" class="px-5 py-2 rounded bg-[#5c4436] hover:bg-[#4a3728] text-amber-100 font-cinzel text-xs font-bold tracking-wider transition shadow">
+                        Fechar Pergaminho
+                    </button>
+                    <button id="modal-action-btn" onclick="completeRegionQuest()" class="px-5 py-2 rounded bg-amber-700 hover:bg-amber-600 text-amber-50 font-cinzel text-xs font-bold tracking-wider transition shadow flex items-center space-x-2">
+                        <i class="fa-solid fa-flag"></i>
+                        <span>Marcar como Desbravado</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="quest-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#f5ebd8] text-[#2c221e] w-full max-w-xl rounded-lg border-4 border-[#5c4436] shadow-2xl overflow-hidden">
+            <div class="bg-[#3a2c26] text-[#f5ebd8] px-6 py-4 flex items-center justify-between border-b-2 border-[#8c6d46]">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-book-journal-whills text-2xl text-amber-500"></i>
+                    <h3 class="font-cinzel text-2xl font-black tracking-wider">Diário de Exploração</h3>
+                </div>
+                <button onclick="closeQuestLog()" class="text-amber-300 hover:text-white text-xl p-1 rounded transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 parchment-texture max-h-[60vh] overflow-y-auto space-y-4">
+                <p class="font-elite text-sm text-[#42342f]">Aqui estão registradas todas as terras lendárias mapeadas:</p>
+                <div id="quest-list" class="space-y-2"></div>
+            </div>
+            <div class="bg-[#3a2c26] px-6 py-3 flex justify-end">
+                <button onclick="closeQuestLog()" class="px-5 py-2 rounded bg-[#5c4436] hover:bg-[#4a3728] text-amber-100 font-cinzel text-xs font-bold transition">
+                    Retornar ao Mapa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const regionsData = {
+            krull: { title: "Krull", subtitle: "O Planeta da Fortaleza Negra", desc: "Uma terra misteriosa situada nas franjas setentrionais do mapa.", quest: "Encontre a Glaive mágica escondida nas cavernas gélidas.", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80", icon: "fa-shield-halved" },
+            oz: { title: "Oz", subtitle: "A Cidade Esmeralda", desc: "Governada pelo Mágico, repleta de estradas de tijolos amarelos.", quest: "Siga a Estrada de Tijolos Amarelos.", img: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80", icon: "fa-gem" },
+            narnia: { title: "Narnia", subtitle: "O Reino através do Guarda-Roupa", desc: "Um mundo onde os animais falam e Aslan governa.", quest: "Derrote as forças da Feiticeira Branca.", img: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80", icon: "fa-snowflake" },
+            neverneverland: { title: "Never Neverland", subtitle: "A Terra do Nunca", desc: "Onde as crianças nunca crescem.", quest: "Escape do Capitão Gancho.", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80", icon: "fa-hat-wizard" },
+            westeros: { title: "Westeros", subtitle: "Os Sete Reinos", desc: "Casas nobres disputam o Trono de Ferro.", quest: "Sobreviva ao Inverno.", img: "https://images.unsplash.com/photo-1514539079130-25950c84af65?auto=format&fit=crop&w=600&q=80", icon: "fa-chess-rook" },
+            middleearth: { title: "Middle Earth", subtitle: "A Terra-Média", desc: "Do Shire até as chamas de Mordor.", quest: "Destrua o Um Anel.", img: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80", icon: "fa-ring" },
+            wonderland: { title: "Wonderland", subtitle: "O País das Maravilhas", desc: "Mundo bizarro com o Chapeleiro Maluco.", quest: "Participe de um Chá das Cinco.", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80", icon: "fa-hat-cowboy" },
+            lilliput: { title: "Lilliput", subtitle: "A Ilha dos Pequenos", desc: "Habitada por seres humanóides minúsculos.", quest: "Navegue pela costa com cautela.", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80", icon: "fa-shoe-prints" },
+            dinotopia: { title: "Dinotopia", subtitle: "Onde os Dinossauros Habitam", desc: "Humanos e dinossauros em harmonia.", quest: "Faça amizade com um herbívoro gigante.", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80", icon: "fa-dragon" },
+            moominvalley: { title: "Moomin Valley", subtitle: "O Vale dos Moomins", desc: "Vale pacífico e acolhedor na Escandinávia.", quest: "Desfrute de um piquenique à beira do rio.", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80", icon: "fa-sun" },
+            whoville: { title: "Whoville", subtitle: "A Cidade dos Whos", desc: "Vilarejo microscópico em floco de neve.", quest: "Cante uma canção alegre.", img: "https://images.unsplash.com/photo-1512389142860-9c449e580543?auto=format&fit=crop&w=600&q=80", icon: "fa-music" },
+            terabithia: { title: "Terabithia", subtitle: "O Reino Oculto", desc: "Reino secreto na imaginação das crianças.", quest: "Defenda a fortaleza.", img: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80", icon: "fa-tree" },
+            sodor: { title: "Sodor", subtitle: "Ilha das Locomotivas", desc: "Onde locomotivas falantes trabalham.", quest: "Ajude o Thomas a entregar a carga.", img: "https://images.unsplash.com/photo-1515165562839-978bbcfc9926?auto=format&fit=crop&w=600&q=80", icon: "fa-train" },
+            hyrule: { title: "Hyrule", subtitle: "O Reino da Triforce", desc: "Protegido por Zelda e Link.", quest: "Encontre os pedaços da Triforce.", img: "https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?auto=format&fit=crop&w=600&q=80", icon: "fa-shield" },
+            utopia: { title: "Utopia", subtitle: "A Ilha da Perfeição", desc: "Harmonia social e paz perpétua.", quest: "Desvende os pergaminhos filosóficos.", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80", icon: "fa-dove" },
+            earthsea: { title: "Earthsea", subtitle: "O Arquipélago Mágico", desc: "Magia baseada no verdadeiro nome.", quest: "Descubra o Verdadeiro Nome do dragão.", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80", icon: "fa-water" },
+            fantasia: { title: "Fantasia", subtitle: "O Reino dos Sonhos", desc: "Ameaçado pelo avanço implacável do Nada.", quest: "Salve a Imperatriz Criança.", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80", icon: "fa-meteor" },
+            thra: { title: "Thra", subtitle: "O Planeta dos Gelflings", desc: "Mundo místico com dois sóis.", quest: "Resolva o enigma do labirinto.", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80", icon: "fa-puzzle-piece" },
+            kadath: { title: "Kadath", subtitle: "A Desconhecida Kadath", desc: "A mítica fortaleza dos deuses.", quest: "Alcance o cume do templo.", img: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80", icon: "fa-mountain" },
+            nehwon: { title: "Nehwon", subtitle: "As Cidades dos Ladrões", desc: "Terra sombria de Lankhmar.", quest: "Realize um roubo na Guilda.", img: "https://images.unsplash.com/photo-1514539079130-25950c84af65?auto=format&fit=crop&w=600&q=80", icon: "fa-mask" },
+            dreamlands: { title: "Dreamlands", subtitle: "As Terras do Sonho", desc: "Dimensão acessada pelo sono profundo.", quest: "Navegue até Celephaïs.", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80", icon: "fa-moon" },
+            avalon: { title: "Avalon", subtitle: "A Ilha das Brumas", desc: "Onde a Excalibur foi forjada.", quest: "Encontre a espada sagrada.", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80", icon: "fa-crown" }
+        };
+
+        let currentRegionKey = null;
+        let discoveredRegions = JSON.parse(localStorage.getItem('discovered_regions') || '[]');
+        let soundEnabled = true;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playChime() {
+            if (!soundEnabled) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('sound-btn');
+            btn.innerHTML = soundEnabled ? '<i class="fa-solid fa-volume-high"></i><span class="hidden sm:inline">Som: On</span>' : '<i class="fa-solid fa-volume-xmark"></i><span class="hidden sm:inline">Som: Off</span>';
+        }
+
+        const mapContainer = document.getElementById('map-container');
+        const worldMap = document.getElementById('world-map');
+        let isDragging = false, startX, startY, scrollLeft, scrollTop;
+
+        mapContainer.addEventListener('mousedown', (e) => {
+            if(e.target.closest('.region-marker')) return;
+            isDragging = true;
+            startX = e.pageX - mapContainer.offsetLeft;
+            startY = e.pageY - mapContainer.offsetTop;
+            scrollLeft = mapContainer.scrollLeft;
+            scrollTop = mapContainer.scrollTop;
+        });
+
+        mapContainer.addEventListener('mouseleave', () => { isDragging = false; });
+        mapContainer.addEventListener('mouseup', () => { isDragging = false; });
+        mapContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - mapContainer.offsetLeft;
+            const y = e.pageY - mapContainer.offsetTop;
+            mapContainer.scrollLeft = scrollLeft - (x - startX) * 1.5;
+            mapContainer.scrollTop = scrollTop - (y - startY) * 1.5;
+        });
+
+        worldMap.addEventListener('mousemove', (e) => {
+            const rect = worldMap.getBoundingClientRect();
+            document.getElementById('coord-display').innerText = `Coordenadas: X:${Math.round(e.clientX - rect.left)}, Y:${Math.round(e.clientY - rect.top)}`;
+        });
+
+        function exploreRegion(key) {
+            currentRegionKey = key;
+            const data = regionsData[key];
+            if (!data) return;
+            playChime();
+
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-subtitle').innerText = data.subtitle;
+            document.getElementById('modal-desc').innerText = data.desc;
+            document.getElementById('modal-quest').innerText = data.quest;
+            document.getElementById('modal-img').src = data.img;
+            document.getElementById('modal-icon').className = `fa-solid ${data.icon} text-2xl text-amber-500`;
+
+            const actionBtn = document.getElementById('modal-action-btn');
+            if (discoveredRegions.includes(key)) {
+                actionBtn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i><span>Desbravado</span>';
+                actionBtn.className = "px-5 py-2 rounded bg-emerald-800 text-emerald-100 font-cinzel text-xs font-bold tracking-wider cursor-default";
+                actionBtn.disabled = true;
+            } else {
+                actionBtn.innerHTML = '<i class="fa-solid fa-flag"></i><span>Marcar como Desbravado</span>';
+                actionBtn.className = "px-5 py-2 rounded bg-amber-700 hover:bg-amber-600 text-amber-50 font-cinzel text-xs font-bold tracking-wider transition shadow flex items-center space-x-2";
+                actionBtn.disabled = false;
+            }
+
+            document.getElementById('region-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('region-modal').classList.add('hidden'); }
+
+        function completeRegionQuest() {
+            if (currentRegionKey && !discoveredRegions.includes(currentRegionKey)) {
+                discoveredRegions.push(currentRegionKey);
+                localStorage.setItem('discovered_regions', JSON.stringify(discoveredRegions));
+                updateHUD();
+                playChime();
+                const actionBtn = document.getElementById('modal-action-btn');
+                actionBtn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i><span>Desbravado</span>';
+                actionBtn.className = "px-5 py-2 rounded bg-emerald-800 text-emerald-100 font-cinzel text-xs font-bold tracking-wider cursor-default";
+                actionBtn.disabled = true;
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('discovered-count').innerText = `Descobertas: ${discoveredRegions.length} / ${Object.keys(regionsData).length}`;
+        }
+
+        function openQuestLog() {
+            const listContainer = document.getElementById('quest-list');
+            listContainer.innerHTML = '';
+            for (const [key, data] of Object.entries(regionsData)) {
+                const isDiscovered = discoveredRegions.includes(key);
+                const item = document.createElement('div');
+                item.className = `p-3 rounded border flex items-center justify-between ${isDiscovered ? 'bg-[#e2d0b0] border-emerald-700/50' : 'bg-[#d8c5a4] border-[#8c6d46]/40 opacity-70'}`;
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center ${isDiscovered ? 'bg-emerald-800 text-white' : 'bg-[#8c6d46] text-amber-100'}">
+                            <i class="fa-solid ${data.icon} text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="font-cinzel font-bold text-sm text-amber-950">${data.title}</div>
+                            <div class="font-elite text-xs text-amber-900/70">${data.subtitle}</div>
+                        </div>
+                    </div>
+                    <div>
+                        ${isDiscovered ? '<span class="text-xs font-cinzel font-bold text-emerald-800 bg-emerald-200/60 px-2.5 py-1 rounded border border-emerald-600">Concluído</span>' : '<span class="text-xs font-elite text-amber-900/60">Não explorado</span>'}
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            }
+            document.getElementById('quest-modal').classList.remove('hidden');
+        }
+
+        function closeQuestLog() { document.getElementById('quest-modal').classList.add('hidden'); }
+
+        window.onload = function() {
+            updateHUD();
+            if(mapContainer) {
+                mapContainer.scrollLeft = (worldMap.scrollWidth - mapContainer.clientWidth) / 2;
+                mapContainer.scrollTop = (worldMap.scrollHeight - mapContainer.clientHeight) / 2;
+            }
+        };
+    </script>
+</body>
+</html>

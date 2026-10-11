@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cake Couture - Receita Exclusiva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8C5367;
+            --primary-light: #B4788C;
+            --accent: #D4AF37;
+            --bg-color: #FDFBF9;
+            --card-bg: #FFFFFF;
+            --text-main: #3E383B;
+            --text-muted: #7A6F73;
+            --border-color: #EFE6E8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(140, 83, 103, 0.08);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        header {
+            background: linear-gradient(135deg, #8C5367 0%, #633344 100%);
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .brand-subtitle {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .recipe-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .yield-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: #F7EFF2;
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 30px;
+            border: 1px solid rgba(140, 83, 103, 0.15);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        @media (min-width: 600px) {
+            .ingredients-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .ingredient-item {
+            background-color: var(--bg-color);
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .ingredient-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            border-color: var(--primary-light);
+        }
+
+        .ingredient-name {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .ingredient-measure {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .ingredient-note {
+            grid-column: 1 / -1;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 0 4px;
+        }
+
+        .steps-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            position: relative;
+            padding-left: 55px;
+            margin-bottom: 25px;
+        }
+
+        .step-item::before {
+            counter-increment: step-counter;
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 38px;
+            height: 38px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(140, 83, 103, 0.2);
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 4px;
+            font-size: 1.05rem;
+        }
+
+        .step-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .footer-note {
+            margin-top: 40px;
+            background: linear-gradient(to right, #F7EFF2, #FDFBF9);
+            padding: 24px;
+            border-radius: 16px;
+            border-left: 4px solid var(--accent);
+            text-align: center;
+        }
+
+        .footer-note p {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Botão de Voltar -->
+<div style="margin-bottom: 1rem;">
+    <button onclick="history.back()" style="background-color: #92400e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+        &larr; Voltar
+    </button>
+</div>
+
+    <div class="container">
+        <header>
+            <div class="brand-subtitle">Cake Couture • Alta Confeitaria</div>
+            <h1>Receita Exclusiva</h1>
+            <div class="recipe-title">Massa Base de Leite em Pó para Bolos de Pote</div>
+        </header>
+
+        <div class="content">
+            <div class="yield-badge">
+                ✨ Rendimento ideal: Aprox. 10 potinhos
+            </div>
+
+            <section>
+                <h2 class="section-title">Ingredientes da Massa</h2>
+                <div class="ingredients-grid">
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Ovos</span>
+                        <span class="ingredient-measure">2 unidades</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Açúcar</span>
+                        <span class="ingredient-measure">½ xícara (90g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Óleo</span>
+                        <span class="ingredient-measure">¼ xícara (60 ml)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Leite integral morno</span>
+                        <span class="ingredient-measure">½ xícara (120 ml)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Farinha de trigo</span>
+                        <span class="ingredient-measure">1 ½ xícara (180g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Leite em pó</span>
+                        <span class="ingredient-measure">½ xícara (50g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Fermento em pó</span>
+                        <span class="ingredient-measure">½ colher (7g)</span>
+                    </div>
+                    <div class="ingredient-note">
+                        💡 Dica: Se achar a massa pesada ao final, adicione + 2 colheres de sopa de leite morno.
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-title">Modo de Preparo</h2>
+                <ol class="steps-list">
+                    <li class="step-item">
+                        <div class="step-title">Bata a base</div>
+                        <div class="step-desc">Em uma tigela, bata bem os ovos e o açúcar com um batedor de arame (fouet), Batedeira ou garfo até obter um creme levemente claro.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Adicione a gordura</div>
+                        <div class="step-desc">Acrescente o óleo e misture até incorporar totalmente à mistura líquida.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Adicione o Leite em Pó</div>
+                        <div class="step-desc">Peneire o leite em pó sobre a mistura e mexa bem para garantir que não fique nenhum gruminho.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Intercale os secos e o líquido</div>
+                        <div class="step-desc">Adicione metade da farinha de trigo peneirada, coloque o leite morno e, em seguida, junte o restante da farinha. Misture delicadamente (sem bater muito) apenas até a massa ficar homogênea.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Coloque o fermento</div>
+                        <div class="step-desc">Adicione o fermento em pó por último e misture suavemente de baixo para cima para aerar a massa.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Asse com carinho</div>
+                        <div class="step-desc">Despeje a massa em uma forma untada e enfarinhada (tamanho ideal de aproximadamente 20x30 cm). Leve ao forno pré-aquecido a 180°C por cerca de 30 a 35 minutos (faça o teste do palito).</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Esfrie e monte</div>
+                        <div class="step-desc">Deixe o bolo esfriar completamente. Depois, esfarele a massa ou corte em Cubos com um cortador para iniciar a montagem dos seus potinhos, intercalando com o recheio de sua preferência.</div>
+                    </li>
+                </ol>
+            </section>
+
+            <div class="footer-note">
+                <p>Muito sucesso para a Cake Couture! 🌸 </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

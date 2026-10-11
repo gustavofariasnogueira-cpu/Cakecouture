@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cake Couture - Central de Gestão</title>
+    <style>
+        :root {
+            --primary: #92400e;          /* Marrom Confeitaria Elegante */
+            --primary-dark: #78350f;     /* Marrom Escuro */
+            --bg-main: #fbf8f5;          /* Bege Fundo Bem Suave */
+            --card-bg: #ffffff;          /* Branco para Cards */
+            --text-main: #292524;        /* Marrom Escuro / Quase Preto para Texto */
+            --text-muted: #78716c;       /* Cinza Acastanhado */
+            --border: #e7e2dc;           /* Bege Borda */
+            --accent-bg: #f5efe6;        /* Bege Hover / Selecionado */
+            --danger: #b91c1c;           /* Vermelho para Excluir */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Barra Lateral (Menu) */
+        .sidebar {
+            width: 260px;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5rem;
+        }
+
+        .logo-area {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            letter-spacing: -0.5px;
+        }
+
+        .menu-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .menu-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: var(--accent-bg);
+            color: var(--primary);
+        }
+
+        /* Área Principal */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .topbar {
+            background-color: var(--card-bg);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-profile {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-area {
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Cards de Visão Geral */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+
+        .card-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .card-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 0.5rem;
+        }
+
+        /* Seções Dinâmicas */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger:hover {
+            background-color: #991b1b;
+        }
+
+        /* Formulário e Tabela de Pedidos */
+        .form-pedido {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .input-group input, .input-group select {
+            padding: 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            outline: none;
+            background: var(--bg-main);
+            color: var(--text-main);
+        }
+
+        .tabela-pedidos {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .tabela-pedidos th, .tabela-pedidos td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .tabela-pedidos th {
+            background-color: var(--accent-bg);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .tabela-pedidos tr:last-child td {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Menu Lateral -->
+    <div class="sidebar">
+        <div>
+            <div class="logo-area">🍰 Cake Couture</div>
+            <ul class="menu-links">
+                <li class="menu-item active" onclick="mudarAba('dashboard', this)">📊 Visão Geral</li>
+                <li class="menu-item" onclick="mudarAba('receitas', this)">📖 Receitas</li>
+                <li class="menu-item" onclick="mudarAba('faturamento', this)">💰 Faturamento</li>
+                <li class="menu-item" onclick="mudarAba('planilha', this)">📑 Planilha</li>
+                <li class="menu-item" onclick="mudarAba('clientes', this)">👥 Clientes / Pedidos</li>
+                <li class="menu-item" onclick="mudarAba('vendas', this)">🛒 Controle de Vendas</li>
+                <li class="menu-item" onclick="window.open('cardapio.html', '_blank')">🌐 Ver Cardápio ↗</li>
+                <li class="menu-item" onclick="mudarAba('contatos', this)">📇 Contatos e Leads</li>
+            </ul>
+        </div>
+        <div class="menu-item" onclick="fazerLogout()" style="color: var(--danger);">🚪 Sair / Login</div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="main-content">
+        <div class="topbar">
+            <span id="tituloTopo" style="font-weight: 600; color: var(--text-muted);">Painel Administrativo</span>
+            <div class="user-profile">
+                <span id="nomeUsuario">👤 Olá, Guh</span>
+            </div>
+        </div>
+
+        <div class="content-area">
+            
+            <!-- ABA 1: DASHBOARD -->
+            <div id="dashboard" class="tab-content active">
+                <div class="section-title">Visão Geral da Confeitaria</div>
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-label">Faturamento do Mês</div>
+                        <div id="faturamentoCard" class="card-value" style="color: #047857;">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-label">Pedidos Pendentes</div>
+                        <div id="totalPedidosCard" class="card-value" style="color: #b45309;">0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-label">Receitas Cadastradas</div>
+                        <div class="card-value">8</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 2: RECEITAS -->
+            <div id="receitas" class="tab-content">
+                <div class="section-title">Gerenciamento de Receitas</div>
+                <iframe src="receitas.html" style="width: 100%; height: calc(100vh - 180px); border: none; border-radius: 8px;"></iframe>
+            </div>
+
+            <!-- ABA 3: FATURAMENTO -->
+            <div id="faturamento" class="tab-content">
+                <div class="section-title">Controle de Faturamento e Custos</div>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">Gráficos e relatórios de entradas, saídas e lucro por doce vendido.</p>
+                <button class="btn">+ Registrar Nova Venda</button>
+            </div>
+
+            <!-- ABA 4: PLANILHA -->
+            <div id="planilha" class="tab-content">
+                <div class="section-title">Planilha de Controle Interno</div>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Acesse a planilha oficial da confeitaria para gerenciar custos e finanças.</p>
+                
+                <div class="card" style="padding: 2.5rem; text-align: center; max-width: 500px;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📑</div>
+                    <h3 style="margin-bottom: 0.5rem; color: var(--text-main);">Planilha Oficial Cake Couture</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Clique no botão abaixo para abrir a planilha em uma nova aba do navegador.</p>
+                    <a href="https://excel.cloud.microsoft/open/onedrive/error/" target="_blank" class="btn" style="text-decoration: none; display: inline-block;">
+                        Abrir Planilha Online ↗
+                    </a>
+                </div>
+            </div>
+
+            <!-- ABA 5: CLIENTES / PEDIDOS -->
+            <div id="clientes" class="tab-content">
+                <div class="section-title">Gestão de Clientes e Encomendas</div>
+                
+                <form class="form-pedido" onsubmit="adicionarPedido(event)">
+                    <div class="input-group">
+                        <label>Nome do Cliente</label>
+                        <input type="text" id="nomeCliente" placeholder="Ex: Ana Souza" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Sabor do Doce</label>
+                        <input type="text" id="saborDoce" placeholder="Ex: Bolo de Cenoura" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Quantidade</label>
+                        <input type="number" id="qtdDoce" min="1" value="1" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Data de Entrega</label>
+                        <input type="date" id="dataEntrega" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Pagamento</label>
+                        <select id="statusPagamento" class="form-input" style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; outline: none; background: var(--bg-main); color: var(--text-main);">
+                            <option value="Pago">Pago</option>
+                            <option value="Pendente" selected>Pendente (Fiado)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">+ Adicionar Pedido</button>
+                </form>
+
+                <table class="tabela-pedidos">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Item / Sabor</th>
+                            <th>Qtd</th>
+                            <th>Entrega</th>
+                            <th>Pagamento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaPedidos">
+                        <!-- Pedidos entram aqui -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ABA 6: CONTROLE DE VENDAS -->
+            <div id="vendas" class="tab-content">
+                <div class="section-title">Registro e Controle de Vendas</div>
+                
+                <form class="form-pedido" onsubmit="registrarVenda(event)">
+                    <div class="input-group">
+                        <label>Item Vendido</label>
+                        <select id="vendaItem" class="form-input" onchange="atualizarValorUnitario()" style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; outline: none; background: var(--bg-main); color: var(--text-main);" required>
+                            <option value="" disabled selected>Selecione o produto</option>
+                            <option value="Bolo" data-preco="14.00">Bolo (R$ 14,00)</option>
+                            <option value="Brigadeiro" data-preco="10.00">Brigadeiro (R$ 10,00)</option>
+                            <option value="Pavê" data-preco="12.00">Pavê (R$ 12,00)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Sabor / Variação</label>
+                        <input type="text" id="vendaSabor" placeholder="Ex: Ninho com Oreo" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Quantidade</label>
+                        <input type="number" id="vendaQtd" min="1" value="1" oninput="calcularTotalVenda()" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Valor Total (R$)</label>
+                        <input type="number" step="0.01" id="vendaValor" placeholder="0,00" required readonly style="background-color: #f3ede2; font-weight: bold;">
+                    </div>
+                    <div class="input-group">
+                        <label>Forma de Pagamento</label>
+                        <select id="vendaPagamento" class="form-input" style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; outline: none; background: var(--bg-main); color: var(--text-main);">
+                            <option value="Pix">Pix</option>
+                            <option value="Débito">Cartão de Débito</option>
+                            <option value="Crédito">Cartão de Crédito</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Alimentação/Refeição">Vale Alimentação / Refeição</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">+ Registrar Venda</button>
+                </form>
+
+                <div style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
+                    <button class="btn" onclick="exportarParaExcel()" style="background-color: #047857; display: flex; align-items: center; gap: 0.5rem;">
+                        📥 Exportar Vendas para Excel
+                    </button>
+                </div>
+
+                <table class="tabela-pedidos">
+                    <thead>
+                        <tr>
+                            <th>Horário</th>
+                            <th>Cliente</th>
+                            <th>Item</th>
+                            <th>Sabor</th>
+                            <th>Qtd</th>
+                            <th>Valor</th>
+                            <th>Pagamento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaVendas">
+                        <!-- Vendas registradas -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+<!-- ABA 7: CONTATOS DE CLIENTES -->
+            <div id="contatos" class="tab-content">
+                <div class="section-title">Contatos de Clientes (Acessos ao Cardápio)</div>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Lista de clientes que se identificaram para realizar encomendas.</p>
+                
+                <table class="tabela-pedidos">
+                    <thead>
+                        <tr>
+                            <th>Data/Horário do Acesso</th>
+                            <th>Nome do Cliente</th>
+                            <th>WhatsApp / E-mail de Contato</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaContatosTabela">
+                        <!-- Contatos entram aqui dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+    <script>
+        // Carrega dados e atualiza todas as telas ao iniciar
+        window.addEventListener('DOMContentLoaded', () => {
+            const nomeSalvo = localStorage.getItem('usuarioLogado');
+            if (nomeSalvo) {
+                document.getElementById('nomeUsuario').innerText = "👤 Olá, " + nomeSalvo;
+            }
+            atualizarTelaPedidos();
+            atualizarTelaVendas();
+            atualizarTelaContatos(); // Nova função de contatos de clientes
+        });
+
+        function mudarAba(idAba, elemento) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+
+            document.getElementById(idAba).classList.add('active');
+            if(elemento) elemento.classList.add('active');
+        }
+
+        // --- SISTEMA DE PEDIDOS E PAGAMENTOS ---
+        function obterPedidos() {
+            let pedidos = localStorage.getItem('cakeCouturePedidos');
+            return pedidos ? JSON.parse(pedidos) : [];
+        }
+
+        function salvarPedidos(pedidos) {
+            localStorage.setItem('cakeCouturePedidos', JSON.stringify(pedidos));
+        }
+
+        function adicionarPedido(event) {
+            event.preventDefault();
+            const cliente = document.getElementById('nomeCliente').value;
+            const sabor = document.getElementById('saborDoce').value;
+            const quantidade = document.getElementById('qtdDoce').value;
+            const data = document.getElementById('dataEntrega').value;
+            const pagamento = document.getElementById('statusPagamento').value;
+
+            const novoPedido = { id: Date.now(), cliente, sabor, quantidade, data, pagamento };
+            let pedidos = obterPedidos();
+            pedidos.push(novoPedido);
+            salvarPedidos(pedidos);
+
+            event.target.reset();
+            document.getElementById('qtdDoce').value = "1";
+            document.getElementById('statusPagamento').value = "Pendente";
+            atualizarTelaPedidos();
+        }
+
+        function alternarPagamento(id) {
+            let pedidos = obterPedidos();
+            pedidos = pedidos.map(p => {
+                if (p.id === id) {
+                    if (p.pagamento === 'Pendente') {
+                        p.pagamento = 'Pago';
+
+                        let precoUnitario = 14.00;
+                        const pedidoLower = p.sabor.toLowerCase();
+                        if (pedidoLower.includes('brigadeiro')) {
+                            precoUnitario = 10.00;
+                        } else if (pedidoLower.includes('pavê') || pedidoLower.includes('pave')) {
+                            precoUnitario = 12.00;
+                        }
+
+                        const valorTotalCalculado = (parseFloat(p.quantidade) * precoUnitario).toFixed(2);
+                        const agora = new Date();
+                        const horario = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+                        let nomeItem = p.sabor;
+                        let nomeSabor = "Encomenda";
+                        if (p.sabor.includes('(') && p.sabor.includes(')')) {
+                            let partes = p.sabor.split('(');
+                            nomeItem = partes[0].trim();
+                            nomeSabor = partes[1].replace(')', '').trim();
+                        }
+
+                        const novaVendaDeEncomenda = {
+                            id: Date.now(),
+                            horario,
+                            cliente: p.cliente,
+                            item: nomeItem,
+                            sabor: nomeSabor,
+                            quantidade: p.quantidade,
+                            valor: valorTotalCalculado,
+                            pagamento: "Pix/Dinheiro (Encomenda)"
+                        };
+
+                        let vendas = obterVendas();
+                        vendas.unshift(novaVendaDeEncomenda);
+                        salvarVendas(vendas);
+                        atualizarTelaVendas();
+                    } else {
+                        p.pagamento = 'Pendente';
+                    }
+                }
+                return p;
+            });
+            salvarPedidos(pedidos);
+            atualizarTelaPedidos();
+        }
+
+        function excluirPedido(id) {
+            let pedidos = obterPedidos();
+            pedidos = pedidos.filter(p => p.id !== id);
+            salvarPedidos(pedidos);
+            atualizarTelaPedidos();
+        }
+
+        function atualizarTelaPedidos() {
+            const pedidos = obterPedidos();
+            const tbody = document.getElementById('listaPedidos');
+            if (!tbody) return;
+            tbody.innerHTML = "";
+
+            const pedidosPendentes = pedidos.filter(p => p.pagamento === 'Pendente');
+
+            if (pedidos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Nenhum pedido cadastrado no momento.</td></tr>`;
+            } else {
+                pedidos.forEach(p => {
+                    const dataFormatada = p.data ? p.data.split('-').reverse().join('/') : '';
+                    let badgeEstilo = p.pagamento === 'Pendente' 
+                        ? 'background-color: #fef3c7; color: #b45309; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 600; cursor: pointer;' 
+                        : 'background-color: #d1fae5; color: #047857; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 600; cursor: pointer;';
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${p.cliente}</strong></td>
+                        <td>${p.sabor}</td>
+                        <td>${p.quantidade}</td>
+                        <td>${dataFormatada}</td>
+                        <td><span style="${badgeEstilo}" title="Clique para alternar o status" onclick="alternarPagamento(${p.id})">${p.pagamento} 🔄</span></td>
+                        <td><button class="btn btn-danger" onclick="excluirPedido(${p.id})">Excluir</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            const contadorCard = document.getElementById('totalPedidosCard');
+            if (contadorCard) {
+                contadorCard.innerText = pedidosPendentes.length;
+            }
+        }
+
+        // --- SISTEMA DE CONTROLE DE VENDAS ---
+        function obterPrecoUnitarioSelecionado() {
+            const selectItem = document.getElementById('vendaItem');
+            const opcaoSelecionada = selectItem.options[selectItem.selectedIndex];
+            return opcaoSelecionada ? parseFloat(opcaoSelecionada.getAttribute('data-preco')) || 0 : 0;
+        }
+
+        function atualizarValorUnitario() {
+            calcularTotalVenda();
+        }
+
+        function calcularTotalVenda() {
+            const precoUnitario = obterPrecoUnitarioSelecionado();
+            const quantidade = parseInt(document.getElementById('vendaQtd').value) || 0;
+            document.getElementById('vendaValor').value = (precoUnitario * quantidade).toFixed(2);
+        }
+
+        function obterVendas() {
+            let vendas = localStorage.getItem('cakeCoutureVendas');
+            return vendas ? JSON.parse(vendas) : [];
+        }
+
+        function salvarVendas(vendas) {
+            localStorage.setItem('cakeCoutureVendas', JSON.stringify(vendas));
+        }
+
+        function registrarVenda(event) {
+            event.preventDefault();
+            const itemSelect = document.getElementById('vendaItem');
+            const itemNome = itemSelect.options[itemSelect.selectedIndex].text.split('(')[0].trim();
+            const sabor = document.getElementById('vendaSabor').value;
+            const quantidade = document.getElementById('vendaQtd').value;
+            const valor = parseFloat(document.getElementById('vendaValor').value).toFixed(2);
+            const pagamento = document.getElementById('vendaPagamento').value;
+            
+            const agora = new Date();
+            const horario = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+            const novaVenda = {
+                id: Date.now(),
+                horario,
+                cliente: "Balcão / Loja",
+                item: itemNome,
+                sabor,
+                quantidade,
+                valor,
+                pagamento
+            };
+
+            let vendas = obterVendas();
+            vendas.unshift(novaVenda);
+            salvarVendas(vendas);
+
+            event.target.reset();
+            document.getElementById('vendaQtd').value = "1";
+            document.getElementById('vendaValor').value = "";
+            atualizarTelaVendas();
+        }
+
+        function excluirVenda(id) {
+            let vendas = obterVendas();
+            vendas = vendas.filter(v => v.id !== id);
+            salvarVendas(vendas);
+            atualizarTelaVendas();
+        }
+
+        function atualizarTelaVendas() {
+            const vendas = obterVendas();
+            const tbody = document.getElementById('listaVendas');
+            if (!tbody) return;
+            
+            tbody.innerHTML = "";
+            let faturamentoTotal = 0;
+
+            if (vendas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Nenhuma venda registrada.</td></tr>`;
+            } else {
+                vendas.forEach(v => {
+                    faturamentoTotal += parseFloat(v.valor);
+                    const nomeCliente = v.cliente ? v.cliente : "Balcão / Loja";
+                    const itemVenda = v.item ? v.item : "Diversos";
+                    const saborVenda = v.sabor ? v.sabor : "-";
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><small style="color: var(--text-muted);">${v.horario}</small></td>
+                        <td><strong>${nomeCliente}</strong></td>
+                        <td>${itemVenda}</td>
+                        <td>${saborVenda}</td>
+                        <td>${v.quantidade}</td>
+                        <td>R$ ${v.valor.replace('.', ',')}</td>
+                        <td><span style="background: var(--accent-bg); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem; color: var(--primary);">${v.pagamento}</span></td>
+                        <td><button class="btn btn-danger" onclick="excluirVenda(${v.id})">Excluir</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            const faturamentoCard = document.getElementById('faturamentoCard');
+            if (faturamentoCard) {
+                faturamentoCard.innerText = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            }
+        }
+
+        // --- SISTEMA DE CONTATOS DE CLIENTES ---
+        function atualizarTelaContatos() {
+            let contatos = localStorage.getItem('cakeCoutureContatos');
+            contatos = contatos ? JSON.parse(contatos) : [];
+            const tbody = document.getElementById('listaContatosTabela');
+            if (!tbody) return;
+
+            tbody.innerHTML = "";
+
+            if (contatos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Nenhum cliente cadastrado ainda.</td></tr>`;
+            } else {
+                contatos.forEach(c => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><small style="color: var(--text-muted);">${c.dataAcesso}</small></td>
+                        <td><strong>${c.nome}</strong></td>
+                        <td><span style="color: var(--primary); font-weight: 600;">${c.contato}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        // --- EXPORTAR PARA EXCEL ---
+        function exportarParaExcel() {
+            const vendas = obterVendas();
+            if (vendas.length === 0) {
+                alert("Não há vendas cadastradas para exportar!");
+                return;
+            }
+
+            let csvContent = "\uFEFF";
+            csvContent += "Horário;Cliente;Item;Sabor;Quantidade;Valor Total;Forma de Pagamento\n";
+
+            vendas.forEach(v => {
+                const nomeCliente = v.cliente ? v.cliente : "Balcão / Loja";
+                const itemVenda = v.item ? v.item : "Diversos";
+                const saborVenda = v.sabor ? v.sabor : "-";
+                const valorFormatado = v.valor.replace('.', ',');
+                csvContent += `"${v.horario}";"${nomeCliente}";"${itemVenda}";"${saborVenda}";${v.quantidade};"R$ ${valorFormatado}";"${v.pagamento}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "relatorio_vendas_cake_couture.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function fazerLogout() {
+            if(confirm("Deseja realmente sair do sistema?")) {
+                localStorage.removeItem('usuarioLogado');
+                window.location.href = "index.html";
+            }
+        }
+    </script>
+</body>
+</html>
