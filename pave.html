@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cake Couture - Receita Pavê de Pote</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FDFBF7;
+            --brand-caramel: #D4A373;
+            --brand-brown: #5C4033;
+            --brand-dark: #3A2E2B;
+            --card-bg: #FFFFFF;
+            --border-subtle: #EFECE6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--brand-dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(92, 64, 51, 0.08);
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+        }
+
+        header {
+            background: linear-gradient(135deg, #5C4033 0%, #3A2E2B 100%);
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--brand-caramel), transparent);
+        }
+
+        .brand-subtitle {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--brand-caramel);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .recipe-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .yield-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: #F5EBE0;
+            color: var(--brand-brown);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            border: 1px solid rgba(212, 163, 115, 0.3);
+        }
+
+        .section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8rem;
+            color: var(--brand-brown);
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        @media (min-width: 600px) {
+            .ingredients-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .ingredient-item {
+            background-color: var(--bg-cream);
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .ingredient-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            border-color: var(--brand-caramel);
+        }
+
+        .ingredient-name {
+            font-weight: 500;
+            color: var(--brand-dark);
+        }
+
+        .ingredient-measure {
+            color: var(--brand-brown);
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .ingredient-note {
+            grid-column: 1 / -1;
+            font-size: 0.85rem;
+            color: #7A6860;
+            font-style: italic;
+            padding: 0 4px;
+        }
+
+        .steps-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            position: relative;
+            padding-left: 55px;
+            margin-bottom: 25px;
+        }
+
+        .step-item::before {
+            counter-increment: step-counter;
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 38px;
+            height: 38px;
+            background-color: var(--brand-caramel);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'DM Serif Display', serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(212, 163, 115, 0.3);
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: var(--brand-brown);
+            margin-bottom: 4px;
+            font-size: 1.05rem;
+        }
+
+        .step-desc {
+            color: #7A6860;
+            font-size: 0.95rem;
+        }
+
+        .footer-note {
+            margin-top: 40px;
+            background: linear-gradient(to right, #F5EBE0, #FDFBF7);
+            padding: 24px;
+            border-radius: 16px;
+            border-left: 4px solid var(--brand-caramel);
+            text-align: center;
+        }
+
+        .footer-note p {
+            font-family: 'DM Serif Display', serif;
+            font-style: italic;
+            color: var(--brand-brown);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Botão de Voltar -->
+<div style="margin-bottom: 1rem;">
+    <button onclick="history.back()" style="background-color: #92400e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+        &larr; Voltar
+    </button>
+</div>
+
+    <div class="container">
+        <header>
+            <div class="brand-subtitle">Cake Couture • Alta Confeitaria</div>
+            <h1>Receita Exclusiva</h1>
+            <div class="recipe-title">Pavê de Pote Tradicional</div>
+        </header>
+
+        <div class="content">
+            <div class="yield-badge">
+                ✨ Rendimento ideal: Aprox. 8 a 10 potinhos de 200 ml
+            </div>
+
+            <!-- Ingredientes do Creme -->
+            <section>
+                <h2 class="section-title">1. Para o Creme Base</h2>
+                <div class="ingredients-grid">
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Leite condensado</span>
+                        <span class="ingredient-measure">1 lata (395g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Creme de leite</span>
+                        <span class="ingredient-measure">1 caixinha (200g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Leite integral</span>
+                        <span class="ingredient-measure">400 ml</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Amido de milho</span>
+                        <span class="ingredient-measure">3 colheres (sopa) / 30g</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Essência de baunilha</span>
+                        <span class="ingredient-measure">1 colher (chá)</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ingredientes da Montagem -->
+            <section>
+                <h2 class="section-title">2. Para a Montagem</h2>
+                <div class="ingredients-grid">
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Biscoito Maisena ou Champanhe</span>
+                        <span class="ingredient-measure">1 pacote (150g a 200g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Leite (para umedecer)</span>
+                        <span class="ingredient-measure">150 ml</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ingredientes da Cobertura -->
+            <section>
+                <h2 class="section-title">3. Para a Cobertura (Ganache)</h2>
+                <div class="ingredients-grid">
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Chocolate meio amargo</span>
+                        <span class="ingredient-measure">150g</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Creme de leite</span>
+                        <span class="ingredient-measure">1 caixinha (200g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Chocolate granulado</span>
+                        <span class="ingredient-measure">Para decorar (opcional)</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Modo de Preparo -->
+            <section>
+                <h2 class="section-title">Modo de Preparo e Montagem</h2>
+                <ol class="steps-list">
+                    <li class="step-item">
+                        <div class="step-title">O Creme Base</div>
+                        <div class="step-desc">Em uma panela fora do fogo, misture o leite condensado com o amido de milho até dissolver completamente. Acrescente o leite integral, o creme de leite e a essência de baunilha, mexendo bem. Leve ao fogo baixo, mexendo sem parar. Quando engrossar, deixe cozinhar por mais 2 minutos para retirar o gosto do amido. Desligue, transfira para uma tigela e cubra com plástico-filme em contato. Espere amornar.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">A Cobertura (Ganache)</div>
+                        <div class="step-desc">Derreta o chocolate meio amargo no micro-ondas (pausando de 30 em 30 segundos) ou em banho-maria. Incorpore a caixinha de creme de leite até obter um creme brilhante, liso e homogêneo. Reserve.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Preparação dos Biscoitos</div>
+                        <div class="step-desc">Coloque os 150 ml de leite em um prato fundo para umedecer os biscoitos rapidamente na hora de montar os potinhos.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Montagem nos Potinhos (200 ml)</div>
+                        <div class="step-desc">Coloque uma colherada do creme base no fundo do pote. Adicione uma camada de biscoitos umedecidos (quebrados se necessário para ajustar no diâmetro do pote). Alterne camadas de creme e biscoitos, terminando com uma camada de creme no topo.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Finalização e Validade</div>
+                        <div class="step-desc">Cubra o topo com a ganache de chocolate reservada e decore com granulado. Tampe os potes e leve à geladeira por pelo menos 2 a 3 horas antes de servir ou comercializar. Validade de até 4 a 5 dias refrigerado.</div>
+                    </li>
+                </ol>
+            </section>
+
+            <div class="footer-note">
+                <p>O Pavê de Pote une praticidade e sabor inconfundível da Cake Couture! ✨</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

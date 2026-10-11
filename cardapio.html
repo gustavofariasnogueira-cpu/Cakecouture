@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio & Encomendas - Cake Couture</title>
+    <style>
+        :root {
+            --primary: #92400e;
+            --primary-dark: #78350f;
+            --bg-main: #fbf8f5;
+            --card-bg: #ffffff;
+            --text-main: #292524;
+            --text-muted: #78716c;
+            --border: #e7e2dc;
+            --accent-bg: #f5efe6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-muted);
+        }
+
+        /* Grade de Produtos */
+        .produtos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .produto-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+
+        .produto-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .produto-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            background-color: var(--accent-bg);
+        }
+
+        .produto-info {
+            padding: 1.25rem;
+        }
+
+        .produto-titulo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .produto-preco {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .produto-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Seção de Encomenda */
+        .form-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        }
+
+        .form-section h2 {
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .input-group input, .input-group select {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            outline: none;
+            background: var(--bg-main);
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .btn-encomendar {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.9rem;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-encomendar:hover {
+            background-color: var(--primary-dark);
+        }
+
+        #sucessoMsg {
+            display: none;
+            background-color: #d1fae5;
+            color: #047857;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>🍰 Cake Couture</h1>
+            <p>Escolha sua delícia favorita e faça sua encomenda diretamente conosco!</p>
+        </div>
+
+        <!-- Vitrine de Produtos -->
+        <div class="produtos-grid">
+            <div class="produto-card">
+                <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=500&q=80" alt="Bolo" class="produto-img">
+                <div class="produto-info">
+                    <div class="produto-titulo">Bolo de Pote</div>
+                    <div class="produto-preco">R$ 14,00</div>
+                    <div class="produto-desc">Massas fofinhas com recheios exclusivos da casa.</div>
+                </div>
+            </div>
+
+            <div class="produto-card">
+                <img src="https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=500&q=80" alt="Brigadeiro" class="produto-img">
+                <div class="produto-info">
+                    <div class="produto-titulo">Brigadeiro Gourmet</div>
+                    <div class="produto-preco">R$ 10,00</div>
+                    <div class="produto-desc">Feito com chocolate nobre e confeitos selecionados.</div>
+                </div>
+            </div>
+
+            <div class="produto-card">
+                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=500&q=80" alt="Pavê" class="produto-img">
+                <div class="produto-info">
+                    <div class="produto-titulo">Pavê de pote</div>
+                    <div class="produto-preco">R$ 12,00</div>
+                    <div class="produto-desc">Camadas delicadas de creme leve e biscoitos.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de Encomenda -->
+        <div class="form-section">
+            <h2>Faça sua Encomenda</h2>
+            
+            <div id="sucessoMsg">🎉 Pedido realizado com sucesso! Em breve entraremos em contato.</div>
+
+            <form onsubmit="enviarEncomendaCliente(event)">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Seu Nome</label>
+                        <input type="text" id="cliNome" placeholder="Nome" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Escolha o Item</label>
+                        <select id="cliItem" onchange="atualizarSabores()" required>
+                            <option value="" disabled selected>Selecione o produto</option>
+                            <option value="Bolo">Bolo (R$ 14,00)</option>
+                            <option value="Brigadeiro">Brigadeiro (R$ 10,00)</option>
+                            <option value="Pavê">Pavê (R$ 12,00)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Escolha o Sabor</label>
+                        <select id="cliSabor" required>
+                            <option value="" disabled selected>Primeiro selecione o item</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Quantidade</label>
+                        <input type="number" id="cliQtd" min="1" value="1" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Data Desejada para Entrega</label>
+                        <input type="date" id="cliData" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-encomendar">Enviar Encomenda 🚀</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Ao abrir o cardápio, verifica se o cliente passou pela tela de login
+        window.addEventListener('DOMContentLoaded', () => {
+            const clienteSalvo = localStorage.getItem('clienteAtualCake');
+            if (!clienteSalvo) {
+                window.location.href = "login_cliente.html";
+            }
+        });
+
+        // Função para atualizar dinamicamente os sabores com base no item escolhido
+        function atualizarSabores() {
+            const itemSelect = document.getElementById('cliItem').value;
+            const saborSelect = document.getElementById('cliSabor');
+            
+            // Limpa as opções anteriores
+            saborSelect.innerHTML = '<option value="" disabled selected>Selecione o sabor</option>';
+
+            let saboresDisponiveis = [];
+
+            if (itemSelect === 'Bolo') {
+                saboresDisponiveis = ['Chocolate', 'Ninho', 'Prestígio', 'Sensação', 'Cenoura'];
+            } else if (itemSelect === 'Brigadeiro') {
+                saboresDisponiveis = ['Chocolate', 'Oreo', 'Ninho'];
+            } else if (itemSelect === 'Pavê') {
+                saboresDisponiveis = ['Pavê Clássico'];
+            }
+
+            saboresDisponiveis.forEach(sabor => {
+                const option = document.createElement('option');
+                option.value = sabor;
+                option.textContent = sabor;
+                saborSelect.appendChild(option);
+            });
+        }
+
+        function enviarEncomendaCliente(event) {
+            event.preventDefault();
+
+            const clienteInfo = JSON.parse(localStorage.getItem('clienteAtualCake'));
+            
+            const item = document.getElementById('cliItem').value;
+            const sabor = document.getElementById('cliSabor').value;
+            const quantidade = document.getElementById('cliQtd').value;
+            const data = document.getElementById('cliData').value;
+
+            const novoPedido = {
+                id: Date.now(),
+                cliente: `${clienteInfo.nome} (${clienteInfo.contato})`,
+                sabor: `${item} (${sabor})`,
+                quantidade,
+                data,
+                pagamento: 'Pendente'
+            };
+
+            let pedidos = localStorage.getItem('cakeCouturePedidos');
+            pedidos = pedidos ? JSON.parse(pedidos) : [];
+            pedidos.push(novoPedido);
+            localStorage.setItem('cakeCouturePedidos', JSON.stringify(pedidos));
+
+            const msg = document.getElementById('sucessoMsg');
+            msg.style.display = 'block';
+            event.target.reset();
+            document.getElementById('cliSabor').innerHTML = '<option value="" disabled selected>Primeiro selecione o item</option>';
+            document.getElementById('cliQtd').value = "1";
+
+            setTimeout(() => {
+                msg.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

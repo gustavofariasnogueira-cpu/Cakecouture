@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cake Couture - Receita Exclusiva Bolo de Cenoura</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FDFBF7;
+            --brand-caramel: #D4A373;
+            --brand-brown: #5C4033;
+            --brand-dark: #3A2E2B;
+            --card-bg: #FFFFFF;
+            --border-subtle: #EFECE6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--brand-dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(92, 64, 51, 0.08);
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+        }
+
+        header {
+            background: linear-gradient(135deg, #5C4033 0%, #3A2E2B 100%);
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--brand-caramel), transparent);
+        }
+
+        .brand-subtitle {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--brand-caramel);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .recipe-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .yield-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: #F5EBE0;
+            color: var(--brand-brown);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            border: 1px solid rgba(212, 163, 115, 0.3);
+        }
+
+        .section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8rem;
+            color: var(--brand-brown);
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        @media (min-width: 600px) {
+            .ingredients-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .ingredient-item {
+            background-color: var(--bg-cream);
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .ingredient-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            border-color: var(--brand-caramel);
+        }
+
+        .ingredient-name {
+            font-weight: 500;
+            color: var(--brand-dark);
+        }
+
+        .ingredient-measure {
+            color: var(--brand-brown);
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .ingredient-note {
+            grid-column: 1 / -1;
+            font-size: 0.85rem;
+            color: #7A6860;
+            font-style: italic;
+            padding: 0 4px;
+        }
+
+        .steps-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            position: relative;
+            padding-left: 55px;
+            margin-bottom: 25px;
+        }
+
+        .step-item::before {
+            counter-increment: step-counter;
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 38px;
+            height: 38px;
+            background-color: var(--brand-caramel);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'DM Serif Display', serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(212, 163, 115, 0.3);
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: var(--brand-brown);
+            margin-bottom: 4px;
+            font-size: 1.05rem;
+        }
+
+        .step-desc {
+            color: #7A6860;
+            font-size: 0.95rem;
+        }
+
+        .footer-note {
+            margin-top: 40px;
+            background: linear-gradient(to right, #F5EBE0, #FDFBF7);
+            padding: 24px;
+            border-radius: 16px;
+            border-left: 4px solid var(--brand-caramel);
+            text-align: center;
+        }
+
+        .footer-note p {
+            font-family: 'DM Serif Display', serif;
+            font-style: italic;
+            color: var(--brand-brown);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Botão de Voltar -->
+<div style="margin-bottom: 1rem;">
+    <button onclick="history.back()" style="background-color: #92400e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+        &larr; Voltar
+    </button>
+</div>
+
+    <div class="container">
+        <header>
+            <div class="brand-subtitle">Cake Couture • Alta Confeitaria</div>
+            <h1>Receita Exclusiva</h1>
+            <div class="recipe-title">Bolo de Cenoura Original com Cobertura Especial</div>
+        </header>
+
+        <div class="content">
+            <div class="yield-badge">
+                ✨ Padrão de xícara: 210 ml | Perfeito para vitrine e potinhos
+            </div>
+
+            <section>
+                <h2 class="section-title">Ingredientes da Massa</h2>
+                <div class="ingredients-grid">
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Ovos</span>
+                        <span class="ingredient-measure">3 unidades (150g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Óleo</span>
+                        <span class="ingredient-measure">¾ xícara (150 ml)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Cenoura picadinha</span>
+                        <span class="ingredient-measure">1 ½ xícara (200g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Açúcar</span>
+                        <span class="ingredient-measure">1 ½ xícara (275g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Farinha de trigo</span>
+                        <span class="ingredient-measure">1 ½ xícara (205g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Fermento em pó</span>
+                        <span class="ingredient-measure">1 colher (sopa) / 14g</span>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-title">Ingredientes da Cobertura</h2>
+                <div class="ingredients-grid">
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Chocolate meio amargo</span>
+                        <span class="ingredient-measure">200g</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Leite condensado</span>
+                        <span class="ingredient-measure">½ xícara (140g)</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">Creme de leite</span>
+                        <span class="ingredient-measure">½ xícara (110g)</span>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-title">Modo de Fazer</h2>
+                <ol class="steps-list">
+                    <li class="step-item">
+                        <div class="step-title">Bata os líquidos e a cenoura</div>
+                        <div class="step-desc">No liquidificador, coloque os ovos, o óleo e a cenoura picadinha. Bata bem por cerca de 2 minutos até que a cenoura esteja totalmente triturada e vire um creme liso.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Adicione o açúcar</div>
+                        <div class="step-desc">Acrescente o açúcar à mistura do liquidificador e bata por mais 1 minuto para incorporar por completo.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Incorpore a farinha</div>
+                        <div class="step-desc">Em uma tigela grande, coloque a farinha de trigo. Despeje o líquido batido do liquidificador sobre a farinha e misture delicadamente com um fouet ou espátula até ficar homogêneo.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Finalize com o fermento</div>
+                        <div class="step-desc">Adicione o fermento em pó por último e misture suavemente, apenas de baixo para cima, para garantir que o bolo cresça fofinho.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Asse com precisão</div>
+                        <div class="step-desc">Despeje a massa em uma forma untada e enfarinhada. Leve ao forno pré-aquecido a 180°C por cerca de 35 a 40 minutos (faça o teste do palito). Espere esfriar para desenformar.</div>
+                    </li>
+                    <li class="step-item">
+                        <div class="step-title">Prepare a Cobertura Especial</div>
+                        <div class="step-desc">Em uma panela em fogo baixo, coloque o chocolate meio amargo picado, o leite condensado e o creme de leite. Mexa sem parar até o chocolate derreter e o creme encorpar levemente, formando uma ganache cremosa e brilhante. Despeje ainda morna sobre o bolo de cenoura.</div>
+                    </li>
+                </ol>
+            </section>
+
+            <div class="footer-note">
+                <p>Um clássico inconfundível com o toque de excelência da Cake Couture! 🥕🍫</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

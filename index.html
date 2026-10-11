@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cake Couture - Login</title>
+    <style>
+        :root {
+            --primary: #92400e;          /* Marrom Confeitaria Elegante */
+            --primary-dark: #78350f;     /* Marrom Escuro */
+            --bg-main: #fbf8f5;          /* Bege Fundo Bem Suave */
+            --card-bg: #ffffff;          /* Branco para Cards */
+            --text-main: #292524;        /* Marrom Escuro / Quase Preto para Texto */
+            --text-muted: #78716c;       /* Cinza Acastanhado */
+            --border: #e7e2dc;           /* Bege Borda */
+            --error: #b91c1c;            /* Vermelho Erro */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-card {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo-area {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-login {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 1rem;
+        }
+
+        .btn-login:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .msg-erro {
+            color: var(--error);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo-area">🍰 Cake Couture</div>
+        <div class="login-subtitle">Entre com suas credenciais para acessar</div>
+
+        <form onsubmit="realizarLogin(event)">
+            <div class="form-group">
+                <label class="form-label">Usuário ou E-mail</label>
+                <input type="text" id="usuario" class="form-input" placeholder="ex: guh" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Senha</label>
+                <input type="password" id="senha" class="form-input" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-login">Entrar no Sistema</button>
+            <div id="msgErro" class="msg-erro">Usuário ou senha incorretos!</div>
+        </form>
+
+        <div class="login-footer">
+            Cake Couture &copy; 2026 - Todos os direitos reservados
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // LISTA DE USUÁRIOS AUTORIZADOS NO SISTEMA
+        // ==========================================
+        // Você pode adicionar quantos usuários quiser aqui seguindo o mesmo formato:
+        const usuariosPermitidos = [
+            { user: "Gustavo", senha: "1234", nome: "Guh" },
+            { user: "Zaqueu", senha: "1234", nome: "Quel" },
+            { user: "Thais", senha: "1234", nome: "Tata" }
+        ];
+
+        function realizarLogin(event) {
+            event.preventDefault(); // Evita recarregar a página
+            
+            const inputUser = document.getElementById('usuario').value.trim();
+            const inputPass = document.getElementById('senha').value;
+            const msgErro = document.getElementById('msgErro');
+
+            // Procura na lista se existe um usuário com esse login e senha
+            const usuarioEncontrado = usuariosPermitidos.find(
+                u => u.user.toLowerCase() === inputUser.toLowerCase() && u.senha === inputPass
+            );
+
+            if (usuarioEncontrado) {
+                // Salva o nome do usuário logado para mostrar depois no painel (opcional)
+                localStorage.setItem('usuarioLogado', usuarioEncontrado.nome);
+                
+                // Redireciona para o seu arquivo principal (indexlogin.html)
+                window.location.href = "indexlogin.html";
+            } else {
+                // Mostra mensagem de erro visual
+                msgErro.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+</html>

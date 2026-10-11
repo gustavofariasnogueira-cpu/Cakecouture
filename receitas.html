@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cake Couture - Menu de Receitas</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FDFBF7;
+            --brand-caramel: #D4A373;
+            --brand-brown: #5C4033;
+            --brand-dark: #3A2E2B;
+            --card-bg: #FFFFFF;
+            --border-subtle: #EFECE6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--brand-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .logo-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 3.5rem;
+            line-height: 1.1;
+            margin-bottom: 5px;
+        }
+
+        .logo-title .cake {
+            color: var(--brand-caramel);
+            display: inline-block;
+        }
+
+        .logo-title .couture {
+            color: var(--brand-brown);
+            display: inline-block;
+            position: relative;
+        }
+
+        .logo-title .couture::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--brand-brown);
+            border-radius: 2px;
+        }
+
+        .logo-subtitle {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            color: var(--brand-brown);
+            font-weight: 600;
+            margin-top: 15px;
+            opacity: 0.85;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, #FFF8F0 0%, #F5EBE0 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 25px 30px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(92, 64, 51, 0.04);
+        }
+
+        .welcome-banner h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.6rem;
+            color: var(--brand-brown);
+            margin-bottom: 8px;
+        }
+
+        .welcome-banner p {
+            color: #7A6860;
+            font-size: 0.95rem;
+        }
+
+        .menu-section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            color: var(--brand-brown);
+            margin-bottom: 20px;
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid var(--border-subtle);
+            padding-bottom: 8px;
+        }
+
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .recipe-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 22px;
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 8px 25px rgba(92, 64, 51, 0.03);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(212, 163, 115, 0.15);
+            border-color: var(--brand-caramel);
+        }
+
+        .recipe-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--brand-caramel);
+            opacity: 0.8;
+        }
+
+        .recipe-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--brand-caramel);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .recipe-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.25rem;
+            color: var(--brand-brown);
+            margin-bottom: 8px;
+        }
+
+        .recipe-desc {
+            font-size: 0.85rem;
+            color: #7A6860;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        .recipe-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #FAF4EE;
+            color: var(--brand-brown);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .recipe-card:hover .recipe-btn {
+            background-color: var(--brand-caramel);
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.85rem;
+            color: #8C7870;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 50px;
+        }
+
+        @media (max-width: 600px) {
+            .logo-title {
+                font-size: 2.8rem;
+            }
+            .container {
+                padding: 20px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header com identidade visual da marca -->
+        <header>
+            <h1 class="logo-title">
+                <span class="cake">Cake</span> <span class="couture">Couture</span>
+            </h1>
+            <div class="logo-subtitle">Doces Artesanais • Livro de Receitas</div>
+        </header>
+
+        <!-- Banner de boas-vindas -->
+        <div class="welcome-banner">
+            <h2>Bem-vindo ao seu Atelier de Receitas ✨</h2>
+            <p>Gerencie suas massas, recheios, bolos e sobremesas com alto padrão de excelência.</p>
+        </div>
+
+        <!-- SEÇÃO: MASSAS E BOLOS -->
+        <h3 class="menu-section-title">🍰 Massas & Bolos Especiais</h3>
+        <div class="recipes-grid">
+            <a href="ninho.html" class="recipe-card">
+                <div>
+                    <span class="recipe-category">Massa Base</span>
+                    <h4 class="recipe-title">Massa de Leite em Pó</h4>
+                    <p class="recipe-desc">Ideal para potinhos e recheios delicados.</p>
+                </div>
+                <div class="recipe-btn"><span>Acessar Receita</span><span>→</span></div>
+            </a>
+
+            <a href="prestigio.html" class="recipe-card">
+                <div>
+                    <span class="recipe-category">Massa Base</span>
+                    <h4 class="recipe-title">Massa de Chocolate Intensa</h4>
+                    <p class="recipe-desc">Com cacau 50% e toque especial de café.</p>
+                </div>
+                <div class="recipe-btn"><span>Acessar Receita</span><span>→</span></div>
+            </a>
+
+            <a href="cenoura.html" class="recipe-card">
+                <div>
+                    <span class="recipe-category">Bolo Tradicional</span>
+                    <h4 class="recipe-title">Bolo de Cenoura Original</h4>
+                    <p class="recipe-desc">Receita tradicional com cobertura de ganache.</p>
+                </div>
+                <div class="recipe-btn"><span>Acessar Receita</span><span>→</span></div>
+            </a>
+        </div>
+
+        <!-- SEÇÃO: RECHEIOS E MONTAGENS -->
+        <h3 class="menu-section-title">🍯 Recheios & Montagens</h3>
+        <div class="recipes-grid">
+            <a href="ninhorecheio.html" class="recipe-card">
+                <div>
+                    <span class="recipe-category">Creme Trufado</span>
+                    <h4 class="recipe-title">Creme de Ninho Aveludado</h4>
+                    <p class="recipe-desc">O queridinho da confeitaria para camadas.</p>
+                </div>
+                <div class="recipe-btn"><span>Acessar Receita</span><span>→</span></div>
+            </a>
+
+            <a href="prestigio.html" class="recipe-card">
+                <div>
+                    <span class="recipe-category">Montagem Completa</span>
+                    <h4 class="recipe-title">Bolo de Pote Prestígio</h4>
+                    <p class="recipe-desc">Chocolate com creme cremoso de coco.</p>
+                </div>
+                <div class="recipe-btn"><span>Acessar Receita</span><span>→</span></div>
+            </a>
+
+            <a href="sensacao.html" class="recipe-card">
+                <div>
+                    <span class="recipe-category">Recheio Especial</span>
+                    <h4 class="recipe-title">Recheio Sensação</h4>
+                    <p class="recipe-desc">Morango (Nesquik) com raspas de chocolate.</p>
+                </div>
+                <div class="recipe-btn"><span>Acessar Receita</span><span>→</span></div>
+            </a>
+        </div>
+
+        <!-- SEÇÃO: DOCINHOS E SOBREMESAS -->
+        <h3 class="menu-section-title">🍫 Docinhos & Sobremesas</h3>
+        <div class="recipes-grid">
+            <a href="brigadeiro.html" class="recipe-card">
+                <div>
+                    <span class="recipe-category">Coleção</span>
+                    <h4 class="recipe-title">Brigadeiros Exclusivos</h4>
+                    <p class="recipe-desc">Oreo, Ninho e Chocolate Original.</p>
+                </div>
+                <div class="recipe-btn"><span>Acessar Receita</span><span>→</span></div>
+            </a>
+
+            <a href="pave.html" class="recipe-card">
+                <div>
+                    <span class="recipe-category">Sobremesa</span>
+                    <h4 class="recipe-title">Pavê de Pote Tradicional</h4>
+                    <p class="recipe-desc">Creme base, biscoitos e ganache no pote.</p>
+                </div>
+                <div class="recipe-btn"><span>Acessar Receita</span><span>→</span></div>
+            </a>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Cake Couture Doces Artesanais. Todos os direitos reservados.</p>
+    </footer>
+
+</body>
+</html>
