@@ -425,13 +425,13 @@
     </div>
 
     <!-- Script de Gestão Local e Navegação -->
+    <!-- Script de Gestão de Vendas Manual e Inicialização -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             const nomeSalvo = localStorage.getItem('usuarioLogado');
             if (nomeSalvo) {
                 document.getElementById('nomeUsuario').innerText = "👤 Olá, " + nomeSalvo;
             }
-            atualizarTelaVendas();
             atualizarTelaContatos();
         });
 
@@ -443,7 +443,7 @@
             if(elemento) elemento.classList.add('active');
         }
 
-        // --- SISTEMA DE CONTROLE DE VENDAS ---
+        // --- SISTEMA DE CONTROLE DE VENDAS MANUAL (BALCÃO) ---
         function obterPrecoUnitarioSelecionado() {
             const selectItem = document.getElementById('vendaItem');
             const opcaoSelecionada = selectItem.options[selectItem.selectedIndex];
@@ -458,15 +458,6 @@
             const precoUnitario = obterPrecoUnitarioSelecionado();
             const quantidade = parseInt(document.getElementById('vendaQtd').value) || 0;
             document.getElementById('vendaValor').value = (precoUnitario * quantidade).toFixed(2);
-        }
-
-        function obterVendas() {
-            let vendas = localStorage.getItem('cakeCoutureVendas');
-            return vendas ? JSON.parse(vendas) : [];
-        }
-
-        function salvarVendas(vendas) {
-            localStorage.setItem('cakeCoutureVendas', JSON.stringify(vendas));
         }
 
         function registrarVenda(event) {
@@ -492,59 +483,25 @@
                 pagamento
             };
 
-            let vendas = obterVendas();
+            let vendas = localStorage.getItem('cakeCoutureVendas');
+            vendas = vendas ? JSON.parse(vendas) : [];
             vendas.unshift(novaVenda);
-            salvarVendas(vendas);
+            localStorage.setItem('cakeCoutureVendas', JSON.stringify(vendas));
 
             event.target.reset();
             document.getElementById('vendaQtd').value = "1";
             document.getElementById('vendaValor').value = "";
-            atualizarTelaVendas();
-        }
-
-        function excluirVenda(id) {
-            let vendas = obterVendas();
-            vendas = vendas.filter(v => v.id !== id);
-            salvarVendas(vendas);
-            atualizarTelaVendas();
-        }
-
-        function atualizarTelaVendas() {
-            const vendas = obterVendas();
-            const tbody = document.getElementById('listaVendas');
-            if (!tbody) return;
             
-            tbody.innerHTML = "";
-            let faturamentoTotal = 0;
+            // Recarrega a página para atualizar a tabela unificada instantaneamente
+            location.reload(); 
+        }
 
-            if (vendas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Nenhuma venda registrada.</td></tr>`;
-            } else {
-                vendas.forEach(v => {
-                    faturamentoTotal += parseFloat(v.valor);
-                    const nomeCliente = v.cliente ? v.cliente : "Balcão / Loja";
-                    const itemVenda = v.item ? v.item : "Diversos";
-                    const saborVenda = v.sabor ? v.sabor : "-";
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><small style="color: var(--text-muted);">${v.horario}</small></td>
-                        <td><strong>${nomeCliente}</strong></td>
-                        <td>${itemVenda}</td>
-                        <td>${saborVenda}</td>
-                        <td>${v.quantidade}</td>
-                        <td>R$ ${v.valor.replace('.', ',')}</td>
-                        <td><span style="background: var(--accent-bg); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem; color: var(--primary);">${v.pagamento}</span></td>
-                        <td><button class="btn btn-danger" onclick="excluirVenda(${v.id})">Excluir</button></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            const faturamentoCard = document.getElementById('faturamentoCard');
-            if (faturamentoCard) {
-                faturamentoCard.innerText = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            }
+        function excluirVendaBalcao(id) {
+            let vendas = localStorage.getItem('cakeCoutureVendas');
+            vendas = vendas ? JSON.parse(vendas) : [];
+            vendas = vendas.filter(v => v.id !== id);
+            localStorage.setItem('cakeCoutureVendas', JSON.stringify(vendas));
+            location.reload();
         }
 
         function atualizarTelaContatos() {
@@ -570,28 +527,26 @@
         }
 
         function exportarParaExcel() {
-            const vendas = obterVendas();
-            if (vendas.length === 0) {
-                alert("Não há vendas cadastradas para exportar!");
+            let vendasBalcao = localStorage.getItem('cakeCoutureVendas');
+            vendasBalcao = vendasBalcao ? JSON.parse(vendasBalcao) : [];
+            if (vendasBalcao.length === 0) {
+                alert("Não há vendas manuais de balcão cadastradas para exportar!");
                 return;
             }
 
             let csvContent = "\uFEFF";
             csvContent += "Horário;Cliente;Item;Sabor;Quantidade;Valor Total;Forma de Pagamento\n";
 
-            vendas.forEach(v => {
-                const nomeCliente = v.cliente ? v.cliente : "Balcão / Loja";
-                const itemVenda = v.item ? v.item : "Diversos";
-                const saborVenda = v.sabor ? v.sabor : "-";
+            vendasBalcao.forEach(v => {
                 const valorFormatado = v.valor.replace('.', ',');
-                csvContent += `"${v.horario}";"${nomeCliente}";"${itemVenda}";"${saborVenda}";${v.quantidade};"R$ ${valorFormatado}";"${v.pagamento}"\n`;
+                csvContent += `"${v.horario}";"${v.cliente}";"${v.item}";"${v.sabor}";${v.quantidade};"R$ ${valorFormatado}";"${v.pagamento}"\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.setAttribute("href", url);
-            link.setAttribute("download", "relatorio_vendas_cake_couture.csv");
+            link.setAttribute("download", "relatorio_vendas_balcao.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -605,7 +560,7 @@
         }
     </script>
 
-    <!-- Importação do Firebase SDK e Sincronização Unificada de Vendas -->
+    <!-- Importação do Firebase SDK e Sincronização Unificada -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -624,7 +579,7 @@
 
         const q = query(collection(db, "pedidos"), orderBy("criadoEm", "desc"));
 
-        // Ouve as mudanças na nuvem em tempo real
+        // Ouve a nuvem em tempo real e alimenta tanto a tabela de pedidos quanto a de vendas
         onSnapshot(q, (snapshot) => {
             const tbodyPedidos = document.getElementById('listaPedidos');
             if (!tbodyPedidos) return;
@@ -637,7 +592,7 @@
                 pedidosNuven.push({ id: documento.id, ...documento.data() });
             });
 
-            // 1. Renderiza a tabela de Clientes / Pedidos
+            // 1. Renderiza a tabela da aba Clientes / Pedidos
             if (pedidosNuven.length === 0) {
                 tbodyPedidos.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Nenhum pedido na nuvem no momento.</td></tr>`;
             } else {
@@ -663,17 +618,85 @@
                 });
             }
 
-            // Atualiza o contador de pendentes no card
+            // Atualiza o contador de pendentes
             const contadorCard = document.getElementById('totalPedidosCard');
             if (contadorCard) {
                 contadorCard.innerText = totalPendentes;
             }
 
-            // 2. Atualiza a Tela de Vendas unificando Balcão + Pedidos Pagos da Nuvem
+            // 2. Renderiza a tabela da aba Controle de Vendas unificando Balcão + Pedidos Pagos Online
             atualizarTelaVendasUnificada(pedidosNuven);
         });
 
-        // Função global para alternar o status na nuvem
+        // Função para atualizar a tela de vendas unificada e somar o faturamento total
+        function atualizarTelaVendasUnificada(pedidosNuven) {
+            const tbodyVendas = document.getElementById('listaVendas');
+            if (!tbodyVendas) return;
+
+            tbodyVendas.innerHTML = "";
+            let faturamentoTotal = 0;
+
+            // A. Vendas manuais de balcão
+            let vendasBalcao = localStorage.getItem('cakeCoutureVendas');
+            vendasBalcao = vendasBalcao ? JSON.parse(vendasBalcao) : [];
+
+            vendasBalcao.forEach(v => {
+                faturamentoTotal += parseFloat(v.valor) || 0;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><small style="color: var(--text-muted);">${v.horario || 'Balcão'}</small></td>
+                    <td><strong>${v.cliente || 'Balcão / Loja'}</strong></td>
+                    <td>${v.item || 'Diversos'}</td>
+                    <td>${v.sabor || '-'}</td>
+                    <td>${v.quantidade || 1}</td>
+                    <td>R$ ${parseFloat(v.valor).toFixed(2).replace('.', ',')}</td>
+                    <td><span style="background: var(--accent-bg); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem; color: var(--primary);">${v.pagamento || 'Dinheiro'}</span></td>
+                    <td><button class="btn btn-danger" onclick="excluirVendaBalcao(${v.id})">Excluir</button></td>
+                `;
+                tbodyVendas.appendChild(tr);
+            });
+
+            // B. Pedidos da nuvem com status "Pago"
+            pedidosNuven.forEach(p => {
+                if (p.status === 'Pago') {
+                    let precoUnitario = 14.00;
+                    const nomeItem = (p.item || '').toLowerCase();
+                    if (nomeItem.includes('brigadeiro')) {
+                        precoUnitario = 10.00;
+                    } else if (nomeItem.includes('pavê') || nomeItem.includes('pave')) {
+                        precoUnitario = 12.00;
+                    }
+                    const qtd = parseInt(p.quantidade) || 1;
+                    const valorTotalItem = precoUnitario * qtd;
+                    faturamentoTotal += valorTotalItem;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><small style="color: var(--text-muted);">Online (Nuven)</small></td>
+                        <td><strong>${p.cliente || 'Cliente Online'}</strong></td>
+                        <td>${p.item || 'Doce'}</td>
+                        <td>${p.sabor || '-'}</td>
+                        <td>${qtd}</td>
+                        <td>R$ ${valorTotalItem.toFixed(2).replace('.', ',')}</td>
+                        <td><span style="background: #d1fae5; color: #047857; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">Pix / Online (Pago)</span></td>
+                        <td><span style="color: var(--text-muted); font-size: 0.85rem;">Gerenciado em Pedidos</span></td>
+                    `;
+                    tbodyVendas.appendChild(tr);
+                }
+            });
+
+            if (vendasBalcao.length === 0 && pedidosNuven.filter(p => p.status === 'Pago').length === 0) {
+                tbodyVendas.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Nenhuma venda registrada ou paga.</td></tr>`;
+            }
+
+            // Atualiza o card de Faturamento do Mês
+            const faturamentoCard = document.getElementById('faturamentoCard');
+            if (faturamentoCard) {
+                faturamentoCard.innerText = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            }
+        }
+
+        // Funções globais do Firebase
         window.alternarStatusNuven = async function(idDoc, statusAtual) {
             const novoStatus = statusAtual === 'Pendente' ? 'Pago' : 'Pendente';
             try {
@@ -685,7 +708,6 @@
             }
         };
 
-        // Função global para excluir pedido da nuvem
         window.removerPedidoNuven = async function(idDoc) {
             if (confirm("Deseja realmente excluir este pedido da nuvem?")) {
                 try {
