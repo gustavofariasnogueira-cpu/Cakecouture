@@ -758,5 +758,40 @@
             }
         }
     </script>
+
+  <!-- Importação do Firebase SDK para Leitura em Tempo Real -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // As mesmas chaves de configuração do Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCCzeVUvLBvv8ZaXL7qbqpwdAyyH_CM9ao",
+    authDomain: "cakecouture-2cfd0.firebaseapp.com",
+    projectId: "cakecouture-2cfd0",
+    storageBucket: "cakecouture-2cfd0.appspot.com",
+    messagingSenderId: "930409816465",
+    appId: "1:930409816465:web:78a7631f059103184d7a30"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Consulta os pedidos ordenados por data de criação
+  const q = query(collection(db, "pedidos"), orderBy("criadoEm", "desc"));
+
+  // O onSnapshot atualiza a lista automaticamente sempre que entra um pedido novo
+  onSnapshot(q, (snapshot) => {
+    const pedidos = [];
+    snapshot.forEach((doc) => {
+      pedidos.push({ id: doc.id, ...doc.data() });
+    });
+
+    console.log("Pedidos carregados da nuvem:", pedidos);
+    
+    // DICA: Aqui você pode percorrer o array 'pedidos' e preencher a sua tabela HTML do painel.
+  });
+</script>
+    
 </body>
 </html>
