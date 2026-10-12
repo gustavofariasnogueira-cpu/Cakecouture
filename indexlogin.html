@@ -605,8 +605,7 @@
         }
     </script>
 
-    <!-- Importação do Firebase SDK para Sincronização em Tempo Real dos Pedidos -->
-    <!-- Importação do Firebase SDK para Sincronização em Tempo Real dos Pedidos e Faturamento -->
+    <!-- Importação do Firebase SDK e Sincronização Unificada de Vendas -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -625,39 +624,26 @@
 
         const q = query(collection(db, "pedidos"), orderBy("criadoEm", "desc"));
 
-        // Atualiza a tabela do painel e o faturamento em tempo real sempre que houver mudanças na nuvem
+        // Ouve as mudanças na nuvem em tempo real
         onSnapshot(q, (snapshot) => {
-            const tbody = document.getElementById('listaPedidos');
-            if (!tbody) return;
-            tbody.innerHTML = "";
+            const tbodyPedidos = document.getElementById('listaPedidos');
+            if (!tbodyPedidos) return;
+            tbodyPedidos.innerHTML = "";
 
             let totalPendentes = 0;
-            let faturamentoTotalCloud = 0;
-            const pedidos = [];
+            const pedidosNuven = [];
 
             snapshot.forEach((documento) => {
-                pedidos.push({ id: documento.id, ...documento.data() });
+                pedidosNuven.push({ id: documento.id, ...documento.data() });
             });
 
-            if (pedidos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Nenhum pedido na nuvem no momento.</td></tr>`;
+            // 1. Renderiza a tabela de Clientes / Pedidos
+            if (pedidosNuven.length === 0) {
+                tbodyPedidos.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Nenhum pedido na nuvem no momento.</td></tr>`;
             } else {
-                pedidos.forEach(p => {
+                pedidosNuven.forEach(p => {
                     const statusAtual = p.status || 'Pendente';
-                    if (statusAtual === 'Pendente') {
-                        totalPendentes++;
-                    } else if (statusAtual === 'Pago') {
-                        // Calcula o valor com base no item e na quantidade
-                        let precoUnitario = 14.00; // Padrão Bolo
-                        const nomeItem = (p.item || '').toLowerCase();
-                        if (nomeItem.includes('brigadeiro')) {
-                            precoUnitario = 10.00;
-                        } else if (nomeItem.includes('pavê') || nomeItem.includes('pave')) {
-                            precoUnitario = 12.00;
-                        }
-                        const qtd = parseInt(p.quantidade) || 1;
-                        faturamentoTotalCloud += (precoUnitario * qtd);
-                    }
+                    if (statusAtual === 'Pendente') totalPendentes++;
 
                     const dataFormatada = p.entrega ? p.entrega.split('-').reverse().join('/') : '';
                     let badgeEstilo = statusAtual === 'Pendente' 
@@ -673,24 +659,21 @@
                         <td><span style="${badgeEstilo}" title="Clique para alternar o status" onclick="alternarStatusNuven('${p.id}', '${statusAtual}')">${statusAtual} 🔄</span></td>
                         <td><button class="btn btn-danger" onclick="removerPedidoNuven('${p.id}')">Excluir</button></td>
                     `;
-                    tbody.appendChild(tr);
+                    tbodyPedidos.appendChild(tr);
                 });
             }
 
-            // Atualiza o card de pedidos pendentes
+            // Atualiza o contador de pendentes no card
             const contadorCard = document.getElementById('totalPedidosCard');
             if (contadorCard) {
                 contadorCard.innerText = totalPendentes;
             }
 
-            // Atualiza o card de Faturamento do Mês somando os pedidos pagos na nuvem
-            const faturamentoCard = document.getElementById('faturamentoCard');
-            if (faturamentoCard) {
-                faturamentoCard.innerText = faturamentoTotalCloud.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            }
+            // 2. Atualiza a Tela de Vendas unificando Balcão + Pedidos Pagos da Nuvem
+            atualizarTelaVendasUnificada(pedidosNuven);
         });
 
-        // Função global para alternar o status entre Pendente e Pago na nuvem
+        // Função global para alternar o status na nuvem
         window.alternarStatusNuven = async function(idDoc, statusAtual) {
             const novoStatus = statusAtual === 'Pendente' ? 'Pago' : 'Pendente';
             try {
@@ -702,7 +685,7 @@
             }
         };
 
-        // Função global para excluir o pedido diretamente do Firebase
+        // Função global para excluir pedido da nuvem
         window.removerPedidoNuven = async function(idDoc) {
             if (confirm("Deseja realmente excluir este pedido da nuvem?")) {
                 try {
@@ -712,6 +695,88 @@
                 }
             }
         };
+    </script>
+
+    <!-- Script de Gestão de Vendas Unificado -->
+    <script>
+        function atualizarTelaVendasUnificada(pedidosNuven = []) {
+            const tbodyVendas = document.getElementById('listaVendas');
+            if (!tbodyVendas) return;
+
+            tbodyVendas.innerHTML = "";
+            let faturamentoTotal = 0;
+
+            // A. Puxa vendas manuais de balcão do navegador
+            let vendasBalcao = localStorage.getItem('cakeCoutureVendas');
+            vendasBalcao = vendasBalcao ? JSON.parse(vendasBalcao) : [];
+
+            // Renderiza vendas de balcão
+            vendasBalcao.forEach(v => {
+                faturamentoTotal += parseFloat(v.valor) || 0;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><small style="color: var(--text-muted);">${v.horario || 'Balcão'}</small></td>
+                    <td><strong>${v.cliente || 'Balcão / Loja'}</strong></td>
+                    <td>${v.item || 'Diversos'}</td>
+                    <td>${v.sabor || '-'}</td>
+                    <td>${v.quantidade || 1}</td>
+                    <td>R$ ${parseFloat(v.valor).toFixed(2).replace('.', ',')}</td>
+                    <td><span style="background: var(--accent-bg); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem; color: var(--primary);">${v.pagamento || 'Dinheiro'}</span></td>
+                    <td><button class="btn btn-danger" onclick="excluirVendaBalcao(${v.id})">Excluir</button></td>
+                `;
+                tbodyVendas.appendChild(tr);
+            });
+
+            // B. Puxa pedidos da nuvem que estejam com status "Pago"
+            pedidosNuven.forEach(p => {
+                if (p.status === 'Pago') {
+                    let precoUnitario = 14.00; // Padrão Bolo
+                    const nomeItem = (p.item || '').toLowerCase();
+                    if (nomeItem.includes('brigadeiro')) {
+                        precoUnitario = 10.00;
+                    } else if (nomeItem.includes('pavê') || nomeItem.includes('pave')) {
+                        precoUnitario = 12.00;
+                    }
+                    const qtd = parseInt(p.quantidade) || 1;
+                    const valorTotalItem = precoUnitario * qtd;
+                    faturamentoTotal += valorTotalItem;
+
+                    const dataFormatada = p.criadoEm && p.criadoEm.toDate ? p.criadoEm.toDate().toLocaleDateString('pt-BR') : 'Online';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><small style="color: var(--text-muted);">${dataFormatada} (Online)</small></td>
+                        <td><strong>${p.cliente || 'Cliente Online'}</strong></td>
+                        <td>${p.item || 'Doce'}</td>
+                        <td>${p.sabor || '-'}</td>
+                        <td>${qtd}</td>
+                        <td>R$ ${valorTotalItem.toFixed(2).replace('.', ',')}</td>
+                        <td><span style="background: #d1fae5; color: #047857; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">Pix / Online (Pago)</span></td>
+                        <td><span style="color: var(--text-muted); font-size: 0.85rem;">Gerenciado em Pedidos</span></td>
+                    `;
+                    tbodyVendas.appendChild(tr);
+                }
+            });
+
+            if (vendasBalcao.length === 0 && pedidosNuven.filter(p => p.status === 'Pago').length === 0) {
+                tbodyVendas.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Nenhuma venda registrada ou paga.</td></tr>`;
+            }
+
+            // Atualiza o card de Faturamento do Mês somando Balcão + Pedidos Pagos Online
+            const faturamentoCard = document.getElementById('faturamentoCard');
+            if (faturamentoCard) {
+                faturamentoCard.innerText = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            }
+        }
+
+        // Função para excluir vendas manuais de balcão
+        window.excluirVendaBalcao = function(id) {
+            let vendas = localStorage.getItem('cakeCoutureVendas');
+            vendas = vendas ? JSON.parse(vendas) : [];
+            vendas = vendas.filter(v => v.id !== id);
+            localStorage.setItem('cakeCoutureVendas', JSON.stringify(vendas));
+            location.reload(); // Recarrega para atualizar a tabela unificada
+        }
     </script>
 </body>
 </html>
