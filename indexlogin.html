@@ -318,60 +318,9 @@
 
             <!-- ABA 5: CLIENTES / PEDIDOS -->
             <div id="clientes" class="tab-content">
-
-                <div class="section-title">Gestão de Clientes e Encomendas</div>
-
-                <form class="form-pedido" onsubmit="adicionarPedido(event)">
-
-                    <div class="input-group">
-
-                        <label>Nome do Cliente</label>
-
-                        <input type="text" id="nomeCliente" placeholder="Ex: Ana Souza" required>
-
-                    </div>
-
-                    <div class="input-group">
-
-                        <label>Sabor do Doce</label>
-
-                        <input type="text" id="saborDoce" placeholder="Ex: Bolo de Cenoura" required>
-
-                    </div>
-
-                    <div class="input-group">
-
-                        <label>Quantidade</label>
-
-                        <input type="number" id="qtdDoce" min="1" value="1" required>
-
-                    </div>
-
-                    <div class="input-group">
-
-                        <label>Data de Entrega</label>
-
-                        <input type="date" id="dataEntrega" required>
-
-                    </div>
-
-                    <div class="input-group">
-
-                        <label>Pagamento</label>
-
-                        <select id="statusPagamento" class="form-input" style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; outline: none; background: var(--bg-main); color: var(--text-main);">
-
-                            <option value="Pago">Pago</option>
-
-                            <option value="Pendente" selected>Pendente (Fiado)</option>
-
-                        </select>
-
-                    </div>
-
-                    <button type="submit" class="btn">+ Adicionar Pedido</button>
-
-                </form>
+                <div class="section-title">Gestão de Clientes e Encomendas (Tempo Real)</div>
+                
+                <table class="tabela-pedidos">
                 
                     <thead>
                         <tr>
@@ -657,6 +606,7 @@
     </script>
 
     <!-- Importação do Firebase SDK para Sincronização em Tempo Real dos Pedidos -->
+    <!-- Importação do Firebase SDK para Sincronização em Tempo Real dos Pedidos -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -692,12 +642,13 @@
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Nenhum pedido na nuvem no momento.</td></tr>`;
             } else {
                 pedidos.forEach(p => {
-                    if (p.status === 'Pendente') totalPendentes++;
+                    const statusAtual = p.status || 'Pendente';
+                    if (statusAtual === 'Pendente') totalPendentes++;
 
                     const dataFormatada = p.entrega ? p.entrega.split('-').reverse().join('/') : '';
-                    let badgeEstilo = p.status === 'Pendente' 
-                        ? 'background-color: #fef3c7; color: #b45309; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 600;' 
-                        : 'background-color: #d1fae5; color: #047857; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 600;';
+                    let badgeEstilo = statusAtual === 'Pendente' 
+                        ? 'background-color: #fef3c7; color: #b45309; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 600; cursor: pointer;' 
+                        : 'background-color: #d1fae5; color: #047857; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 600; cursor: pointer;';
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -705,7 +656,7 @@
                         <td>${p.item} (${p.sabor})</td>
                         <td>${p.quantidade}</td>
                         <td>${dataFormatada}</td>
-                        <td><span style="${badgeEstilo}">${p.status || 'Pendente'}</span></td>
+                        <td><span style="${badgeEstilo}" title="Clique para alternar o status" onclick="alternarStatusNuven('${p.id}', '${statusAtual}')">${statusAtual} 🔄</span></td>
                         <td><button class="btn btn-danger" onclick="removerPedidoNuven('${p.id}')">Excluir</button></td>
                     `;
                     tbody.appendChild(tr);
@@ -717,6 +668,18 @@
                 contadorCard.innerText = totalPendentes;
             }
         });
+
+        // Função global para alternar o status entre Pendente e Pago na nuvem
+        window.alternarStatusNuven = async function(idDoc, statusAtual) {
+            const novoStatus = statusAtual === 'Pendente' ? 'Pago' : 'Pendente';
+            try {
+                const docRef = doc(db, "pedidos", idDoc);
+                await updateDoc(docRef, { status: novoStatus });
+            } catch (e) {
+                console.error("Erro ao atualizar status: ", e);
+                alert("Erro ao atualizar o status na nuvem.");
+            }
+        };
 
         // Função global para excluir o pedido diretamente do Firebase
         window.removerPedidoNuven = async function(idDoc) {
