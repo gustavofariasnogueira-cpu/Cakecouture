@@ -606,7 +606,7 @@
     </script>
 
     <!-- Importação do Firebase SDK para Sincronização em Tempo Real dos Pedidos -->
-    <!-- Importação do Firebase SDK para Sincronização em Tempo Real dos Pedidos -->
+    <!-- Importação do Firebase SDK para Sincronização em Tempo Real dos Pedidos e Faturamento -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -625,13 +625,14 @@
 
         const q = query(collection(db, "pedidos"), orderBy("criadoEm", "desc"));
 
-        // Atualiza a tabela do painel em tempo real sempre que houver mudanças na nuvem
+        // Atualiza a tabela do painel e o faturamento em tempo real sempre que houver mudanças na nuvem
         onSnapshot(q, (snapshot) => {
             const tbody = document.getElementById('listaPedidos');
             if (!tbody) return;
             tbody.innerHTML = "";
 
             let totalPendentes = 0;
+            let faturamentoTotalCloud = 0;
             const pedidos = [];
 
             snapshot.forEach((documento) => {
@@ -643,7 +644,20 @@
             } else {
                 pedidos.forEach(p => {
                     const statusAtual = p.status || 'Pendente';
-                    if (statusAtual === 'Pendente') totalPendentes++;
+                    if (statusAtual === 'Pendente') {
+                        totalPendentes++;
+                    } else if (statusAtual === 'Pago') {
+                        // Calcula o valor com base no item e na quantidade
+                        let precoUnitario = 14.00; // Padrão Bolo
+                        const nomeItem = (p.item || '').toLowerCase();
+                        if (nomeItem.includes('brigadeiro')) {
+                            precoUnitario = 10.00;
+                        } else if (nomeItem.includes('pavê') || nomeItem.includes('pave')) {
+                            precoUnitario = 12.00;
+                        }
+                        const qtd = parseInt(p.quantidade) || 1;
+                        faturamentoTotalCloud += (precoUnitario * qtd);
+                    }
 
                     const dataFormatada = p.entrega ? p.entrega.split('-').reverse().join('/') : '';
                     let badgeEstilo = statusAtual === 'Pendente' 
@@ -663,9 +677,16 @@
                 });
             }
 
+            // Atualiza o card de pedidos pendentes
             const contadorCard = document.getElementById('totalPedidosCard');
             if (contadorCard) {
                 contadorCard.innerText = totalPendentes;
+            }
+
+            // Atualiza o card de Faturamento do Mês somando os pedidos pagos na nuvem
+            const faturamentoCard = document.getElementById('faturamentoCard');
+            if (faturamentoCard) {
+                faturamentoCard.innerText = faturamentoTotalCloud.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             }
         });
 
