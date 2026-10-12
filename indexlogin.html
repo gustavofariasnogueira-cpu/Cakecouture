@@ -341,7 +341,8 @@
             <div id="vendas" class="tab-content">
                 <div class="section-title">Registro e Controle de Vendas (Nuvem)</div>
                 
-                <form class="form-pedido" onsubmit="registrarVendaFirebase(event)">
+                <!-- Formulário sem onsubmit inline para evitar problemas de escopo -->
+                <form class="form-pedido" id="formVendaBalcao">
                     <div class="input-group">
                         <label>Item Vendido</label>
                         <select id="vendaItem" class="form-input" onchange="atualizarValorUnitario()" style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; outline: none; background: var(--bg-main); color: var(--text-main);" required>
@@ -560,8 +561,8 @@
             recalcularFaturamentoEArmazenar();
         });
 
-        // Função global para registrar venda de balcão direto no Firebase
-        window.registrarVendaFirebase = async function(event) {
+        // Gatilho via JavaScript para o formulário de balcão enviar direto para o Firebase
+        document.getElementById('formVendaBalcao').addEventListener('submit', async function(event) {
             event.preventDefault();
             const itemSelect = document.getElementById('vendaItem');
             const itemNome = itemSelect.options[itemSelect.selectedIndex].text.split('(')[0].trim();
@@ -581,7 +582,7 @@
                     criadoEm: serverTimestamp()
                 });
 
-                event.target.reset();
+                this.reset();
                 document.getElementById('vendaQtd').value = "1";
                 document.getElementById('vendaValor').value = "";
                 alert("Venda de balcão registrada com sucesso na nuvem! 🚀");
@@ -589,7 +590,7 @@
                 console.error("Erro ao registrar venda: ", e);
                 alert("Erro ao salvar a venda. Verifique a consola.");
             }
-        };
+        });
 
         // Função global para excluir venda de balcão da nuvem
         window.excluirVendaNuven = async function(idDoc) {
