@@ -52,14 +52,14 @@
         /* Grade de Produtos */
         .produtos-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Força exatamente 3 colunas lado a lado */
+            grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem;
             margin-bottom: 3rem;
         }
 
         @media (max-width: 768px) {
             .produtos-grid {
-                grid-template-columns: 1fr; /* Em telas menores (celular), empilha um embaixo do outro */
+                grid-template-columns: 1fr;
             }
         }
 
@@ -227,7 +227,7 @@
         <div class="form-section">
             <h2>Faça sua Encomenda</h2>
             
-            <div id="sucessoMsg">🎉 Pedido realizado com sucesso! Em breve entraremos em contato.</div>
+            <div id="sucessoMsg">🎉 Pedido realizado com sucesso na nuvem! Em breve entraremos em contato.</div>
 
             <form onsubmit="enviarEncomendaCliente(event)">
                 <div class="form-grid">
@@ -264,12 +264,57 @@
         </div>
     </div>
 
+    <!-- Script de Inicialização e Lógica do Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCzeVUvLBvv8ZaXL7qbqpwdAyyH_CM9ao",
+            authDomain: "cakecouture-2cfd0.firebaseapp.com",
+            projectId: "cakecouture-2cfd0",
+            storageBucket: "cakecouture-2cfd0.appspot.com",
+            messagingSenderId: "930409816465",
+            appId: "1:930409816465:web:78a7631f059103184d7a30"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Função global chamada pelo formulário para enviar ao Firestore
+        window.enviarPedidoParaFirebase = async function(dadosPedido) {
+            try {
+                await addDoc(collection(db, "pedidos"), {
+                    cliente: dadosPedido.cliente,
+                    item: dadosPedido.item,
+                    sabor: dadosPedido.sabor,
+                    quantidade: dadosPedido.quantidade,
+                    entrega: dadosPedido.data,
+                    status: "Pendente",
+                    criadoEm: serverTimestamp()
+                });
+                console.log("Pedido salvo com sucesso no Firebase!");
+            } catch (erro) {
+                console.error("Erro ao salvar no Firestore: ", erro);
+                alert("Erro ao enviar para a nuvem. Verifique a consola.");
+            }
+        };
+    </script>
+
     <script>
         // Ao abrir o cardápio, verifica se o cliente passou pela tela de login
         window.addEventListener('DOMContentLoaded', () => {
             const clienteSalvo = localStorage.getItem('clienteAtualCake');
             if (!clienteSalvo) {
                 window.location.href = "login_cliente.html";
+            } else {
+                // Preenche automaticamente o campo nome se o cliente já estiver logado
+                try {
+                    const clienteInfo = JSON.parse(clienteSalvo);
+                    if(clienteInfo && clienteInfo.nome) {
+                        document.getElementById('cliNome').value = clienteInfo.nome;
+                    }
+                } catch(e) {}
             }
         });
 
@@ -278,7 +323,6 @@
             const itemSelect = document.getElementById('cliItem').value;
             const saborSelect = document.getElementById('cliSabor');
             
-            // Limpa as opções anteriores
             saborSelect.innerHTML = '<option value="" disabled selected>Selecione o sabor</option>';
 
             let saboresDisponiveis = [];
@@ -299,80 +343,55 @@
             });
         }
 
-        function enviarEncomendaCliente(event) {
+        // Função principal do formulário
+        async function enviarEncomendaCliente(event) {
             event.preventDefault();
 
-            const clienteInfo = JSON.parse(localStorage.getItem('clienteAtualCake'));
+            const clienteSalvo = localStorage.getItem('clienteAtualCake');
+            const clienteInfo = clienteSalvo ? JSON.parse(clienteSalvo) : { nome: document.getElementById('cliNome').value, contato: 'Não informado' };
             
+            const nomeInput = document.getElementById('cliNome').value;
             const item = document.getElementById('cliItem').value;
             const sabor = document.getElementById('cliSabor').value;
             const quantidade = document.getElementById('cliQtd').value;
             const data = document.getElementById('cliData').value;
 
-            const novoPedido = {
-                id: Date.now(),
-                cliente: `${clienteInfo.nome} (${clienteInfo.contato})`,
-                sabor: `${item} (${sabor})`,
-                quantidade,
-                data,
-                pagamento: 'Pendente'
+            const dadosPedido = {
+                cliente: `${nomeInput} (${clienteInfo.contato || 'Cliente'})`,
+                item: item,
+                sabor: sabor,
+                quantidade: quantidade,
+                data: data
             };
 
+            // Envia para o Firebase Firestore
+            if (typeof window.enviarPedidoParaFirebase === 'function') {
+                await window.enviarPedidoParaFirebase(dadosPedido);
+            }
+
+            // Mantém também no localStorage para compatibilidade local
+            const novoPedidoLocal = {
+                id: Date.now(),
+                ...dadosPedido,
+                pagamento: 'Pendente'
+            };
             let pedidos = localStorage.getItem('cakeCouturePedidos');
             pedidos = pedidos ? JSON.parse(pedidos) : [];
-            pedidos.push(novoPedido);
+            pedidos.push(novoPedidoLocal);
             localStorage.setItem('cakeCouturePedidos', JSON.stringify(pedidos));
 
+            // Exibe mensagem de sucesso e limpa o formulário
             const msg = document.getElementById('sucessoMsg');
             msg.style.display = 'block';
             event.target.reset();
             document.getElementById('cliSabor').innerHTML = '<option value="" disabled selected>Primeiro selecione o item</option>';
             document.getElementById('cliQtd').value = "1";
+            if(nomeInput) document.getElementById('cliNome').value = nomeInput; // Mantém o nome preenchido
 
             setTimeout(() => {
                 msg.style.display = 'none';
             }, 5000);
         }
     </script>
-
-<!-- Importação do Firebase SDK via CDN (Modular) -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-  // Suas credenciais do Firebase geradas agora
-  const firebaseConfig = {
-    apiKey: "AIzaSyCCzeVUvLBvv8ZaXL7qbqpwdAyyH_CM9ao",
-    authDomain: "cakecouture-2cfd0.firebaseapp.com",
-    projectId: "cakecouture-2cfd0",
-    storageBucket: "cakecouture-2cfd0.appspot.com",
-    messagingSenderId: "930409816465",
-    appId: "1:930409816465:web:78a7631f059103184d7a30"
-  };
-
-  // Inicializa o Firebase e o Firestore
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // Função para enviar o pedido quando o cliente clicar em "Enviar Encomenda"
-  window.enviarPedidoParaFirebase = async function(nomeCliente, itemEscolhido, saborEscolhido, qtd, dataEntrega) {
-    try {
-      await addDoc(collection(db, "pedidos"), {
-        cliente: nomeCliente,
-        item: itemEscolhido,
-        sabor: saborEscolhido,
-        quantidade: qtd,
-        entrega: dataEntrega,
-        status: "Pendente",
-        criadoEm: serverTimestamp()
-      });
-      alert("Encomenda enviada com sucesso para a nuvem da Cake Couture! 🚀");
-    } catch (erro) {
-      console.error("Erro ao salvar o pedido: ", erro);
-      alert("Houve um erro ao enviar sua encomenda. Tente novamente.");
-    }
-  };
-</script>
-    
 </body>
 </html>
