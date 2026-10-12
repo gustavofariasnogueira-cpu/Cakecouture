@@ -341,7 +341,6 @@
             <div id="vendas" class="tab-content">
                 <div class="section-title">Registro e Controle de Vendas (Nuvem)</div>
                 
-                <!-- Formulário sem onsubmit inline para evitar problemas de escopo -->
                 <form class="form-pedido" id="formVendaBalcao">
                     <div class="input-group">
                         <label>Item Vendido</label>
@@ -499,9 +498,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        let pedidosNuvenCache = [];
+        let vendasNuvenCache = [];
+
         // 1. Sincronização em tempo real dos Pedidos / Encomendas do Cardápio
         const qPedidos = query(collection(db, "pedidos"), orderBy("criadoEm", "desc"));
-        let pedidosNuvenCache = [];
 
         onSnapshot(qPedidos, (snapshot) => {
             const tbodyPedidos = document.getElementById('listaPedidos');
@@ -545,12 +546,12 @@
                 contadorCard.innerText = totalPendentes;
             }
 
+            renderizarTabelaVendasUnificada();
             recalcularFaturamentoEArmazenar();
         });
 
         // 2. Sincronização em tempo real das Vendas Manuais de Balcão na Nuvem
         const qVendas = query(collection(db, "vendas"), orderBy("criadoEm", "desc"));
-        let vendasNuvenCache = [];
 
         onSnapshot(qVendas, (snapshot) => {
             vendasNuvenCache = [];
@@ -630,7 +631,8 @@
 
             // B. Renderiza Pedidos Online com status "Pago"
             pedidosNuvenCache.forEach(p => {
-                if (p.status === 'Pago') {
+                const statusStr = (p.status || '').trim();
+                if (statusStr === 'Pago') {
                     let precoUnitario = 14.00;
                     const nomeItem = (p.item || '').toLowerCase();
                     if (nomeItem.includes('brigadeiro')) {
@@ -658,7 +660,7 @@
                 }
             });
 
-            if (vendasNuvenCache.length === 0 && pedidosNuvenCache.filter(p => p.status === 'Pago').length === 0) {
+            if (vendasNuvenCache.length === 0 && pedidosNuvenCache.filter(p => (p.status || '').trim() === 'Pago').length === 0) {
                 tbodyVendas.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Nenhuma venda registrada ou paga.</td></tr>`;
             }
         }
@@ -674,7 +676,8 @@
 
             // Soma pedidos online pagos
             pedidosNuvenCache.forEach(p => {
-                if (p.status === 'Pago') {
+                const statusStr = (p.status || '').trim();
+                if (statusStr === 'Pago') {
                     let precoUnitario = 14.00;
                     const nomeItem = (p.item || '').toLowerCase();
                     if (nomeItem.includes('brigadeiro')) {
@@ -695,7 +698,7 @@
 
         // Funções globais de gerenciamento de pedidos
         window.alternarStatusNuven = async function(idDoc, statusAtual) {
-            const novoStatus = statusAtual === 'Pendente' ? 'Pago' : 'Pendente';
+            const novoStatus = (statusAtual || '').trim() === 'Pendente' ? 'Pago' : 'Pendente';
             try {
                 const docRef = doc(db, "pedidos", idDoc);
                 await updateDoc(docRef, { status: novoStatus });
