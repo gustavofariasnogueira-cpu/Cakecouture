@@ -298,7 +298,7 @@
             <div id="faturamento" class="tab-content">
                 <div class="section-title">Controle de Faturamento e Custos</div>
                 <p style="color: var(--text-muted); margin-bottom: 1rem;">Gráficos e relatórios de entradas, saídas e lucro por doce vendido.</p>
-                <button class="btn">+ Registrar Nova Venda</button>
+                <button class="btn" onclick="mudarAba('vendas', document.querySelectorAll('.menu-item')[5])">+ Registrar Nova Venda</button>
             </div>
 
             <!-- ABA 4: PLANILHA -->
@@ -321,7 +321,6 @@
                 <div class="section-title">Gestão de Clientes e Encomendas (Tempo Real)</div>
                 
                 <table class="tabela-pedidos">
-                
                     <thead>
                         <tr>
                             <th>Cliente</th>
@@ -340,9 +339,9 @@
 
             <!-- ABA 6: CONTROLE DE VENDAS -->
             <div id="vendas" class="tab-content">
-                <div class="section-title">Registro e Controle de Vendas</div>
+                <div class="section-title">Registro e Controle de Vendas (Nuvem)</div>
                 
-                <form class="form-pedido" onsubmit="registrarVenda(event)">
+                <form class="form-pedido" onsubmit="registrarVendaFirebase(event)">
                     <div class="input-group">
                         <label>Item Vendido</label>
                         <select id="vendaItem" class="form-input" onchange="atualizarValorUnitario()" style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; outline: none; background: var(--bg-main); color: var(--text-main);" required>
@@ -377,12 +376,6 @@
                     <button type="submit" class="btn">+ Registrar Venda</button>
                 </form>
 
-                <div style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
-                    <button class="btn" onclick="exportarParaExcel()" style="background-color: #047857; display: flex; align-items: center; gap: 0.5rem;">
-                        📥 Exportar Vendas para Excel
-                    </button>
-                </div>
-
                 <table class="tabela-pedidos">
                     <thead>
                         <tr>
@@ -397,7 +390,7 @@
                         </tr>
                     </thead>
                     <tbody id="listaVendas">
-                        <!-- Vendas registradas -->
+                        <!-- Vendas da nuvem entram aqui -->
                     </tbody>
                 </table>
             </div>
@@ -424,8 +417,7 @@
         </div>
     </div>
 
-    <!-- Script de Gestão Local e Navegação -->
-    <!-- Script de Gestão de Vendas Manual e Inicialização -->
+    <!-- Script de Gestão Geral e Auxiliares -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             const nomeSalvo = localStorage.getItem('usuarioLogado');
@@ -443,7 +435,6 @@
             if(elemento) elemento.classList.add('active');
         }
 
-        // --- SISTEMA DE CONTROLE DE VENDAS MANUAL (BALCÃO) ---
         function obterPrecoUnitarioSelecionado() {
             const selectItem = document.getElementById('vendaItem');
             const opcaoSelecionada = selectItem.options[selectItem.selectedIndex];
@@ -458,50 +449,6 @@
             const precoUnitario = obterPrecoUnitarioSelecionado();
             const quantidade = parseInt(document.getElementById('vendaQtd').value) || 0;
             document.getElementById('vendaValor').value = (precoUnitario * quantidade).toFixed(2);
-        }
-
-        function registrarVenda(event) {
-            event.preventDefault();
-            const itemSelect = document.getElementById('vendaItem');
-            const itemNome = itemSelect.options[itemSelect.selectedIndex].text.split('(')[0].trim();
-            const sabor = document.getElementById('vendaSabor').value;
-            const quantidade = document.getElementById('vendaQtd').value;
-            const valor = parseFloat(document.getElementById('vendaValor').value).toFixed(2);
-            const pagamento = document.getElementById('vendaPagamento').value;
-            
-            const agora = new Date();
-            const horario = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-
-            const novaVenda = {
-                id: Date.now(),
-                horario,
-                cliente: "Balcão / Loja",
-                item: itemNome,
-                sabor,
-                quantidade,
-                valor,
-                pagamento
-            };
-
-            let vendas = localStorage.getItem('cakeCoutureVendas');
-            vendas = vendas ? JSON.parse(vendas) : [];
-            vendas.unshift(novaVenda);
-            localStorage.setItem('cakeCoutureVendas', JSON.stringify(vendas));
-
-            event.target.reset();
-            document.getElementById('vendaQtd').value = "1";
-            document.getElementById('vendaValor').value = "";
-            
-            // Recarrega a página para atualizar a tabela unificada instantaneamente
-            location.reload(); 
-        }
-
-        function excluirVendaBalcao(id) {
-            let vendas = localStorage.getItem('cakeCoutureVendas');
-            vendas = vendas ? JSON.parse(vendas) : [];
-            vendas = vendas.filter(v => v.id !== id);
-            localStorage.setItem('cakeCoutureVendas', JSON.stringify(vendas));
-            location.reload();
         }
 
         function atualizarTelaContatos() {
@@ -526,32 +473,6 @@
             }
         }
 
-        function exportarParaExcel() {
-            let vendasBalcao = localStorage.getItem('cakeCoutureVendas');
-            vendasBalcao = vendasBalcao ? JSON.parse(vendasBalcao) : [];
-            if (vendasBalcao.length === 0) {
-                alert("Não há vendas manuais de balcão cadastradas para exportar!");
-                return;
-            }
-
-            let csvContent = "\uFEFF";
-            csvContent += "Horário;Cliente;Item;Sabor;Quantidade;Valor Total;Forma de Pagamento\n";
-
-            vendasBalcao.forEach(v => {
-                const valorFormatado = v.valor.replace('.', ',');
-                csvContent += `"${v.horario}";"${v.cliente}";"${v.item}";"${v.sabor}";${v.quantidade};"R$ ${valorFormatado}";"${v.pagamento}"\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", "relatorio_vendas_balcao.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
         function fazerLogout() {
             if(confirm("Deseja realmente sair do sistema?")) {
                 localStorage.removeItem('usuarioLogado');
@@ -560,10 +481,10 @@
         }
     </script>
 
-    <!-- Importação do Firebase SDK e Sincronização Unificada -->
+    <!-- Importação do Firebase SDK e Sincronização Unificada em Nuvem -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCCzeVUvLBvv8ZaXL7qbqpwdAyyH_CM9ao",
@@ -577,26 +498,26 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const q = query(collection(db, "pedidos"), orderBy("criadoEm", "desc"));
+        // 1. Sincronização em tempo real dos Pedidos / Encomendas do Cardápio
+        const qPedidos = query(collection(db, "pedidos"), orderBy("criadoEm", "desc"));
+        let pedidosNuvenCache = [];
 
-        // Ouve a nuvem em tempo real e alimenta tanto a tabela de pedidos quanto a de vendas
-        onSnapshot(q, (snapshot) => {
+        onSnapshot(qPedidos, (snapshot) => {
             const tbodyPedidos = document.getElementById('listaPedidos');
             if (!tbodyPedidos) return;
             tbodyPedidos.innerHTML = "";
 
             let totalPendentes = 0;
-            const pedidosNuven = [];
+            pedidosNuvenCache = [];
 
             snapshot.forEach((documento) => {
-                pedidosNuven.push({ id: documento.id, ...documento.data() });
+                pedidosNuvenCache.push({ id: documento.id, ...documento.data() });
             });
 
-            // 1. Renderiza a tabela da aba Clientes / Pedidos
-            if (pedidosNuven.length === 0) {
+            if (pedidosNuvenCache.length === 0) {
                 tbodyPedidos.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Nenhum pedido na nuvem no momento.</td></tr>`;
             } else {
-                pedidosNuven.forEach(p => {
+                pedidosNuvenCache.forEach(p => {
                     const statusAtual = p.status || 'Pendente';
                     if (statusAtual === 'Pendente') totalPendentes++;
 
@@ -618,46 +539,96 @@
                 });
             }
 
-            // Atualiza o contador de pendentes
             const contadorCard = document.getElementById('totalPedidosCard');
             if (contadorCard) {
                 contadorCard.innerText = totalPendentes;
             }
 
-            // 2. Renderiza a tabela da aba Controle de Vendas unificando Balcão + Pedidos Pagos Online
-            atualizarTelaVendasUnificada(pedidosNuven);
+            recalcularFaturamentoEArmazenar();
         });
 
-        // Função para atualizar a tela de vendas unificada e somar o faturamento total
-        function atualizarTelaVendasUnificada(pedidosNuven) {
+        // 2. Sincronização em tempo real das Vendas Manuais de Balcão na Nuvem
+        const qVendas = query(collection(db, "vendas"), orderBy("criadoEm", "desc"));
+        let vendasNuvenCache = [];
+
+        onSnapshot(qVendas, (snapshot) => {
+            vendasNuvenCache = [];
+            snapshot.forEach((documento) => {
+                vendasNuvenCache.push({ id: documento.id, ...documento.data() });
+            });
+            renderizarTabelaVendasUnificada();
+            recalcularFaturamentoEArmazenar();
+        });
+
+        // Função global para registrar venda de balcão direto no Firebase
+        window.registrarVendaFirebase = async function(event) {
+            event.preventDefault();
+            const itemSelect = document.getElementById('vendaItem');
+            const itemNome = itemSelect.options[itemSelect.selectedIndex].text.split('(')[0].trim();
+            const sabor = document.getElementById('vendaSabor').value;
+            const quantidade = parseInt(document.getElementById('vendaQtd').value) || 1;
+            const valor = parseFloat(document.getElementById('vendaValor').value) || 0;
+            const pagamento = document.getElementById('vendaPagamento').value;
+
+            try {
+                await addDoc(collection(db, "vendas"), {
+                    cliente: "Balcão / Loja",
+                    item: itemNome,
+                    sabor: sabor,
+                    quantidade: quantidade,
+                    valor: valor,
+                    pagamento: pagamento,
+                    criadoEm: serverTimestamp()
+                });
+
+                event.target.reset();
+                document.getElementById('vendaQtd').value = "1";
+                document.getElementById('vendaValor').value = "";
+                alert("Venda de balcão registrada com sucesso na nuvem! 🚀");
+            } catch (e) {
+                console.error("Erro ao registrar venda: ", e);
+                alert("Erro ao salvar a venda. Verifique a consola.");
+            }
+        };
+
+        // Função global para excluir venda de balcão da nuvem
+        window.excluirVendaNuven = async function(idDoc) {
+            if (confirm("Deseja realmente excluir esta venda de balcão?")) {
+                try {
+                    await deleteDoc(doc(db, "vendas", idDoc));
+                } catch (e) {
+                    console.error("Erro ao excluir venda: ", e);
+                }
+            }
+        };
+
+        // Renderiza a tabela de Controle de Vendas unificando Balcão + Pedidos Online Pagos
+        function renderizarTabelaVendasUnificada() {
             const tbodyVendas = document.getElementById('listaVendas');
             if (!tbodyVendas) return;
 
             tbodyVendas.innerHTML = "";
-            let faturamentoTotal = 0;
 
-            // A. Vendas manuais de balcão
-            let vendasBalcao = localStorage.getItem('cakeCoutureVendas');
-            vendasBalcao = vendasBalcao ? JSON.parse(vendasBalcao) : [];
+            // A. Renderiza Vendas de Balcão da Nuvem
+            vendasNuvenCache.forEach(v => {
+                const dataFormatada = v.criadoEm && v.criadoEm.toDate ? v.criadoEm.toDate().toLocaleDateString('pt-BR') + ' ' + v.criadoEm.toDate().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) : 'Agora';
 
-            vendasBalcao.forEach(v => {
-                faturamentoTotal += parseFloat(v.valor) || 0;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><small style="color: var(--text-muted);">${v.horario || 'Balcão'}</small></td>
-                    <td><strong>${v.cliente || 'Balcão / Loja'}</strong></td>
-                    <td>${v.item || 'Diversos'}</td>
-                    <td>${v.sabor || '-'}</td>
-                    <td>${v.quantidade || 1}</td>
+                    <td><small style="color: var(--text-muted);">${dataFormatada}</small></td>
+                    <td><strong>${v.cliente}</strong></td>
+                    <td>${v.item}</td>
+                    <td>${v.sabor}</td>
+                    <td>${v.quantidade}</td>
                     <td>R$ ${parseFloat(v.valor).toFixed(2).replace('.', ',')}</td>
-                    <td><span style="background: var(--accent-bg); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem; color: var(--primary);">${v.pagamento || 'Dinheiro'}</span></td>
-                    <td><button class="btn btn-danger" onclick="excluirVendaBalcao(${v.id})">Excluir</button></td>
+                    <td><span style="background: var(--accent-bg); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem; color: var(--primary);">${v.pagamento}</span></td>
+                    <td><button class="btn btn-danger" onclick="excluirVendaNuven('${v.id}')">Excluir</button></td>
                 `;
                 tbodyVendas.appendChild(tr);
             });
 
-            // B. Pedidos da nuvem com status "Pago"
-            pedidosNuven.forEach(p => {
+            // B. Renderiza Pedidos Online com status "Pago"
+            pedidosNuvenCache.forEach(p => {
                 if (p.status === 'Pago') {
                     let precoUnitario = 14.00;
                     const nomeItem = (p.item || '').toLowerCase();
@@ -668,11 +639,12 @@
                     }
                     const qtd = parseInt(p.quantidade) || 1;
                     const valorTotalItem = precoUnitario * qtd;
-                    faturamentoTotal += valorTotalItem;
+
+                    const dataFormatada = p.criadoEm && p.criadoEm.toDate ? p.criadoEm.toDate().toLocaleDateString('pt-BR') : 'Online';
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td><small style="color: var(--text-muted);">Online (Nuven)</small></td>
+                        <td><small style="color: var(--text-muted);">${dataFormatada} (Online)</small></td>
                         <td><strong>${p.cliente || 'Cliente Online'}</strong></td>
                         <td>${p.item || 'Doce'}</td>
                         <td>${p.sabor || '-'}</td>
@@ -685,18 +657,42 @@
                 }
             });
 
-            if (vendasBalcao.length === 0 && pedidosNuven.filter(p => p.status === 'Pago').length === 0) {
+            if (vendasNuvenCache.length === 0 && pedidosNuvenCache.filter(p => p.status === 'Pago').length === 0) {
                 tbodyVendas.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Nenhuma venda registrada ou paga.</td></tr>`;
             }
+        }
 
-            // Atualiza o card de Faturamento do Mês
+        // Calcula o faturamento total unificando Balcão + Pedidos Online Pagos
+        function recalcularFaturamentoEArmazenar() {
+            let faturamentoTotal = 0;
+
+            // Soma vendas de balcão
+            vendasNuvenCache.forEach(v => {
+                faturamentoTotal += parseFloat(v.valor) || 0;
+            });
+
+            // Soma pedidos online pagos
+            pedidosNuvenCache.forEach(p => {
+                if (p.status === 'Pago') {
+                    let precoUnitario = 14.00;
+                    const nomeItem = (p.item || '').toLowerCase();
+                    if (nomeItem.includes('brigadeiro')) {
+                        precoUnitario = 10.00;
+                    } else if (nomeItem.includes('pavê') || nomeItem.includes('pave')) {
+                        precoUnitario = 12.00;
+                    }
+                    const qtd = parseInt(p.quantidade) || 1;
+                    faturamentoTotal += (precoUnitario * qtd);
+                }
+            });
+
             const faturamentoCard = document.getElementById('faturamentoCard');
             if (faturamentoCard) {
                 faturamentoCard.innerText = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             }
         }
 
-        // Funções globais do Firebase
+        // Funções globais de gerenciamento de pedidos
         window.alternarStatusNuven = async function(idDoc, statusAtual) {
             const novoStatus = statusAtual === 'Pendente' ? 'Pago' : 'Pendente';
             try {
@@ -717,88 +713,6 @@
                 }
             }
         };
-    </script>
-
-    <!-- Script de Gestão de Vendas Unificado -->
-    <script>
-        function atualizarTelaVendasUnificada(pedidosNuven = []) {
-            const tbodyVendas = document.getElementById('listaVendas');
-            if (!tbodyVendas) return;
-
-            tbodyVendas.innerHTML = "";
-            let faturamentoTotal = 0;
-
-            // A. Puxa vendas manuais de balcão do navegador
-            let vendasBalcao = localStorage.getItem('cakeCoutureVendas');
-            vendasBalcao = vendasBalcao ? JSON.parse(vendasBalcao) : [];
-
-            // Renderiza vendas de balcão
-            vendasBalcao.forEach(v => {
-                faturamentoTotal += parseFloat(v.valor) || 0;
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><small style="color: var(--text-muted);">${v.horario || 'Balcão'}</small></td>
-                    <td><strong>${v.cliente || 'Balcão / Loja'}</strong></td>
-                    <td>${v.item || 'Diversos'}</td>
-                    <td>${v.sabor || '-'}</td>
-                    <td>${v.quantidade || 1}</td>
-                    <td>R$ ${parseFloat(v.valor).toFixed(2).replace('.', ',')}</td>
-                    <td><span style="background: var(--accent-bg); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem; color: var(--primary);">${v.pagamento || 'Dinheiro'}</span></td>
-                    <td><button class="btn btn-danger" onclick="excluirVendaBalcao(${v.id})">Excluir</button></td>
-                `;
-                tbodyVendas.appendChild(tr);
-            });
-
-            // B. Puxa pedidos da nuvem que estejam com status "Pago"
-            pedidosNuven.forEach(p => {
-                if (p.status === 'Pago') {
-                    let precoUnitario = 14.00; // Padrão Bolo
-                    const nomeItem = (p.item || '').toLowerCase();
-                    if (nomeItem.includes('brigadeiro')) {
-                        precoUnitario = 10.00;
-                    } else if (nomeItem.includes('pavê') || nomeItem.includes('pave')) {
-                        precoUnitario = 12.00;
-                    }
-                    const qtd = parseInt(p.quantidade) || 1;
-                    const valorTotalItem = precoUnitario * qtd;
-                    faturamentoTotal += valorTotalItem;
-
-                    const dataFormatada = p.criadoEm && p.criadoEm.toDate ? p.criadoEm.toDate().toLocaleDateString('pt-BR') : 'Online';
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><small style="color: var(--text-muted);">${dataFormatada} (Online)</small></td>
-                        <td><strong>${p.cliente || 'Cliente Online'}</strong></td>
-                        <td>${p.item || 'Doce'}</td>
-                        <td>${p.sabor || '-'}</td>
-                        <td>${qtd}</td>
-                        <td>R$ ${valorTotalItem.toFixed(2).replace('.', ',')}</td>
-                        <td><span style="background: #d1fae5; color: #047857; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">Pix / Online (Pago)</span></td>
-                        <td><span style="color: var(--text-muted); font-size: 0.85rem;">Gerenciado em Pedidos</span></td>
-                    `;
-                    tbodyVendas.appendChild(tr);
-                }
-            });
-
-            if (vendasBalcao.length === 0 && pedidosNuven.filter(p => p.status === 'Pago').length === 0) {
-                tbodyVendas.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Nenhuma venda registrada ou paga.</td></tr>`;
-            }
-
-            // Atualiza o card de Faturamento do Mês somando Balcão + Pedidos Pagos Online
-            const faturamentoCard = document.getElementById('faturamentoCard');
-            if (faturamentoCard) {
-                faturamentoCard.innerText = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            }
-        }
-
-        // Função para excluir vendas manuais de balcão
-        window.excluirVendaBalcao = function(id) {
-            let vendas = localStorage.getItem('cakeCoutureVendas');
-            vendas = vendas ? JSON.parse(vendas) : [];
-            vendas = vendas.filter(v => v.id !== id);
-            localStorage.setItem('cakeCoutureVendas', JSON.stringify(vendas));
-            location.reload(); // Recarrega para atualizar a tabela unificada
-        }
     </script>
 </body>
 </html>
