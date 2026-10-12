@@ -508,36 +508,67 @@
         }
 
         function registrarVenda(event) {
+
             event.preventDefault();
+
             const itemSelect = document.getElementById('vendaItem');
+
             const itemNome = itemSelect.options[itemSelect.selectedIndex].text.split('(')[0].trim();
+
             const sabor = document.getElementById('vendaSabor').value;
+
             const quantidade = document.getElementById('vendaQtd').value;
+
             const valor = parseFloat(document.getElementById('vendaValor').value).toFixed(2);
+
             const pagamento = document.getElementById('vendaPagamento').value;
+
             
+
             const agora = new Date();
+
             const horario = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
 
+
+
             const novaVenda = {
+
                 id: Date.now(),
+
                 horario,
+
                 cliente: "Balcão / Loja",
+
                 item: itemNome,
+
                 sabor,
+
                 quantidade,
+
                 valor,
+
                 pagamento
+
             };
 
+
+
             let vendas = obterVendas();
+
             vendas.unshift(novaVenda);
+
             salvarVendas(vendas);
 
+
+
             event.target.reset();
+
             document.getElementById('vendaQtd').value = "1";
+
             document.getElementById('vendaValor').value = "";
+
             atualizarTelaVendas();
+
         }
 
         function excluirVenda(id) {
