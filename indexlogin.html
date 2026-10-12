@@ -318,9 +318,61 @@
 
             <!-- ABA 5: CLIENTES / PEDIDOS -->
             <div id="clientes" class="tab-content">
-                <div class="section-title">Gestão de Clientes e Encomendas (Tempo Real)</div>
+
+                <div class="section-title">Gestão de Clientes e Encomendas</div>
+
+                <form class="form-pedido" onsubmit="adicionarPedido(event)">
+
+                    <div class="input-group">
+
+                        <label>Nome do Cliente</label>
+
+                        <input type="text" id="nomeCliente" placeholder="Ex: Ana Souza" required>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Sabor do Doce</label>
+
+                        <input type="text" id="saborDoce" placeholder="Ex: Bolo de Cenoura" required>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Quantidade</label>
+
+                        <input type="number" id="qtdDoce" min="1" value="1" required>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Data de Entrega</label>
+
+                        <input type="date" id="dataEntrega" required>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Pagamento</label>
+
+                        <select id="statusPagamento" class="form-input" style="padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; outline: none; background: var(--bg-main); color: var(--text-main);">
+
+                            <option value="Pago">Pago</option>
+
+                            <option value="Pendente" selected>Pendente (Fiado)</option>
+
+                        </select>
+
+                    </div>
+
+                    <button type="submit" class="btn">+ Adicionar Pedido</button>
+
+                </form>
                 
-                <table class="tabela-pedidos">
                     <thead>
                         <tr>
                             <th>Cliente</th>
