@@ -334,5 +334,45 @@
             }, 5000);
         }
     </script>
+
+<!-- Importação do Firebase SDK via CDN (Modular) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // Suas credenciais do Firebase geradas agora
+  const firebaseConfig = {
+    apiKey: "AIzaSyCCzeVUvLBvv8ZaXL7qbqpwdAyyH_CM9ao",
+    authDomain: "cakecouture-2cfd0.firebaseapp.com",
+    projectId: "cakecouture-2cfd0",
+    storageBucket: "cakecouture-2cfd0.appspot.com",
+    messagingSenderId: "930409816465",
+    appId: "1:930409816465:web:78a7631f059103184d7a30"
+  };
+
+  // Inicializa o Firebase e o Firestore
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Função para enviar o pedido quando o cliente clicar em "Enviar Encomenda"
+  window.enviarPedidoParaFirebase = async function(nomeCliente, itemEscolhido, saborEscolhido, qtd, dataEntrega) {
+    try {
+      await addDoc(collection(db, "pedidos"), {
+        cliente: nomeCliente,
+        item: itemEscolhido,
+        sabor: saborEscolhido,
+        quantidade: qtd,
+        entrega: dataEntrega,
+        status: "Pendente",
+        criadoEm: serverTimestamp()
+      });
+      alert("Encomenda enviada com sucesso para a nuvem da Cake Couture! 🚀");
+    } catch (erro) {
+      console.error("Erro ao salvar o pedido: ", erro);
+      alert("Houve um erro ao enviar sua encomenda. Tente novamente.");
+    }
+  };
+</script>
+    
 </body>
 </html>
