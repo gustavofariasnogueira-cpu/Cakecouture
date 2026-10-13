@@ -173,15 +173,25 @@
             background-color: var(--primary-dark);
         }
 
+        /* Caixa de Sucesso e Pagamento Pix */
         #sucessoMsg {
             display: none;
-            background-color: #d1fae5;
-            color: #047857;
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .pix-box {
+            background: #ffffff;
+            border: 1px dashed #16a34a;
             padding: 1rem;
             border-radius: 8px;
-            text-align: center;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
+            margin-top: 1rem;
+            text-align: left;
         }
     </style>
 </head>
@@ -199,7 +209,7 @@
                 <img src="img/pot.png" alt="Bolo" class="produto-img">
                 <div class="produto-info">
                     <div class="produto-titulo">Bolo de Pote</div>
-                    <div class="produto-preco">R$ 14,00</div>
+                    <div class="produto-preco" data-preco="14.00">R$ 14,00</div>
                     <div class="produto-desc">Massas fofinhas com recheios exclusivos da casa.</div>
                 </div>
             </div>
@@ -208,7 +218,7 @@
                 <img src="img/briga.jpg" alt="Brigadeiro" class="produto-img">
                 <div class="produto-info">
                     <div class="produto-titulo">Brigadeiro Gourmet</div>
-                    <div class="produto-preco">R$ 10,00</div>
+                    <div class="produto-preco" data-preco="10.00">R$ 10,00</div>
                     <div class="produto-desc">Feito com chocolate nobre e confeitos selecionados.</div>
                 </div>
             </div>
@@ -217,7 +227,7 @@
                 <img src="img/pav.png" alt="Pavê" class="produto-img">
                 <div class="produto-info">
                     <div class="produto-titulo">Pavê de pote</div>
-                    <div class="produto-preco">R$ 12,00</div>
+                    <div class="produto-preco" data-preco="12.00">R$ 12,00</div>
                     <div class="produto-desc">Camadas delicadas de creme leve e biscoitos.</div>
                 </div>
             </div>
@@ -227,9 +237,18 @@
         <div class="form-section">
             <h2>Faça sua Encomenda</h2>
             
-            <div id="sucessoMsg">🎉 Pedido realizado com sucesso na nuvem! Em breve entraremos em contato.</div>
+            <!-- Mensagem de Sucesso e Pagamento Pix Dinâmico -->
+            <div id="sucessoMsg">
+                <h3 style="margin-bottom: 0.5rem;">🎉 Pedido realizado e enviado para a nuvem!</h3>
+                <p>Para confirmar sua encomenda, realize o pagamento via Pix abaixo:</p>
+                <div class="pix-box">
+                    <p><strong>Valor Total:</strong> <span id="pixValorTotal" style="color: #047857; font-size: 1.1rem;">R$ 0,00</span></p>
+                    <p style="margin-top: 0.5rem;"><strong>Chave Pix (E-mail / CNPJ):</strong> <code style="background: #e2e8f0; padding: 0.2rem 0.4rem; border-radius: 4px;">financeiro@cakecouture.com</code></p>
+                    <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">Assim que o pagamento for identificado, atualizaremos seu pedido para Pago em nosso sistema. Obrigado!</p>
+                </div>
+            </div>
 
-            <form onsubmit="enviarEncomendaCliente(event)">
+            <form id="formEncomendaCliente">
                 <div class="form-grid">
                     <div class="input-group">
                         <label>Seu Nome</label>
@@ -259,7 +278,7 @@
                         <input type="date" id="cliData" required>
                     </div>
                 </div>
-                <button type="submit" class="btn-encomendar">Enviar Encomenda 🚀</button>
+                <button type="submit" class="btn-encomendar">Enviar Encomenda e Ver Pix 🚀</button>
             </form>
         </div>
     </div>
@@ -281,34 +300,67 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Função global chamada pelo formulário para enviar ao Firestore
-        window.enviarPedidoParaFirebase = async function(dadosPedido) {
+        // Ao enviar o formulário, salva no Firestore e exibe o Pix com o valor calculado
+        document.getElementById('formEncomendaCliente').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const clienteSalvo = localStorage.getItem('clienteAtualCake');
+            const clienteInfo = clienteSalvo ? JSON.parse(clienteSalvo) : { nome: document.getElementById('cliNome').value, contato: 'Não informado' };
+            
+            const nomeInput = document.getElementById('cliNome').value;
+            const item = document.getElementById('cliItem').value;
+            const sabor = document.getElementById('cliSabor').value;
+            const quantidade = parseInt(document.getElementById('cliQtd').value) || 1;
+            const data = document.getElementById('cliData').value;
+
+            // Calcula o preço com base no item escolhido
+            let precoUnitario = 14.00;
+            if (item.toLowerCase().includes('brigadeiro')) {
+                precoUnitario = 10.00;
+            } else if (item.toLowerCase().includes('pavê') || item.toLowerCase().includes('pave')) {
+                precoUnitario = 12.00;
+            }
+            const valorTotalCalculado = precoUnitario * quantidade;
+
             try {
+                // Envia para o Firestore (gerando a notificação em tempo real no painel administrativo)
                 await addDoc(collection(db, "pedidos"), {
-                    cliente: dadosPedido.cliente,
-                    item: dadosPedido.item,
-                    sabor: dadosPedido.sabor,
-                    quantidade: dadosPedido.quantidade,
-                    entrega: dadosPedido.data,
+                    cliente: `${nomeInput} (${clienteInfo.contato || 'Cliente'})`,
+                    item: item,
+                    sabor: sabor,
+                    quantidade: quantidade,
+                    entrega: data,
                     status: "Pendente",
                     criadoEm: serverTimestamp()
                 });
-                console.log("Pedido salvo com sucesso no Firebase!");
+
+                // Atualiza o valor na caixa de Pix e exibe a mensagem de sucesso
+                document.getElementById('pixValorTotal').innerText = valorTotalCalculado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const msg = document.getElementById('sucessoMsg');
+                msg.style.display = 'block';
+
+                // Limpa o formulário mantendo o nome
+                this.reset();
+                document.getElementById('cliSabor').innerHTML = '<option value="" disabled selected>Primeiro selecione o item</option>';
+                document.getElementById('cliQtd').value = "1";
+                if(nomeInput) document.getElementById('cliNome').value = nomeInput;
+
+                // Rola suavemente para a mensagem de sucesso
+                msg.scrollIntoView({ behavior: 'smooth' });
+
             } catch (erro) {
                 console.error("Erro ao salvar no Firestore: ", erro);
-                alert("Erro ao enviar para a nuvem. Verifique a consola.");
+                alert("Houve um erro ao enviar sua encomenda para a nuvem. Tente novamente.");
             }
-        };
+        });
     </script>
 
     <script>
-        // Ao abrir o cardápio, verifica se o cliente passou pela tela de login
         window.addEventListener('DOMContentLoaded', () => {
             const clienteSalvo = localStorage.getItem('clienteAtualCake');
             if (!clienteSalvo) {
                 window.location.href = "login_cliente.html";
             } else {
-                // Preenche automaticamente o campo nome se o cliente já estiver logado
                 try {
                     const clienteInfo = JSON.parse(clienteSalvo);
                     if(clienteInfo && clienteInfo.nome) {
@@ -318,7 +370,6 @@
             }
         });
 
-        // Função para atualizar dinamicamente os sabores com base no item escolhido
         function atualizarSabores() {
             const itemSelect = document.getElementById('cliItem').value;
             const saborSelect = document.getElementById('cliSabor');
@@ -341,56 +392,6 @@
                 option.textContent = sabor;
                 saborSelect.appendChild(option);
             });
-        }
-
-        // Função principal do formulário
-        async function enviarEncomendaCliente(event) {
-            event.preventDefault();
-
-            const clienteSalvo = localStorage.getItem('clienteAtualCake');
-            const clienteInfo = clienteSalvo ? JSON.parse(clienteSalvo) : { nome: document.getElementById('cliNome').value, contato: 'Não informado' };
-            
-            const nomeInput = document.getElementById('cliNome').value;
-            const item = document.getElementById('cliItem').value;
-            const sabor = document.getElementById('cliSabor').value;
-            const quantidade = document.getElementById('cliQtd').value;
-            const data = document.getElementById('cliData').value;
-
-            const dadosPedido = {
-                cliente: `${nomeInput} (${clienteInfo.contato || 'Cliente'})`,
-                item: item,
-                sabor: sabor,
-                quantidade: quantidade,
-                data: data
-            };
-
-            // Envia para o Firebase Firestore
-            if (typeof window.enviarPedidoParaFirebase === 'function') {
-                await window.enviarPedidoParaFirebase(dadosPedido);
-            }
-
-            // Mantém também no localStorage para compatibilidade local
-            const novoPedidoLocal = {
-                id: Date.now(),
-                ...dadosPedido,
-                pagamento: 'Pendente'
-            };
-            let pedidos = localStorage.getItem('cakeCouturePedidos');
-            pedidos = pedidos ? JSON.parse(pedidos) : [];
-            pedidos.push(novoPedidoLocal);
-            localStorage.setItem('cakeCouturePedidos', JSON.stringify(pedidos));
-
-            // Exibe mensagem de sucesso e limpa o formulário
-            const msg = document.getElementById('sucessoMsg');
-            msg.style.display = 'block';
-            event.target.reset();
-            document.getElementById('cliSabor').innerHTML = '<option value="" disabled selected>Primeiro selecione o item</option>';
-            document.getElementById('cliQtd').value = "1";
-            if(nomeInput) document.getElementById('cliNome').value = nomeInput; // Mantém o nome preenchido
-
-            setTimeout(() => {
-                msg.style.display = 'none';
-            }, 5000);
         }
     </script>
 </body>
