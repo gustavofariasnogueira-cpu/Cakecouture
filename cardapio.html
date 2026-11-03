@@ -307,8 +307,8 @@
                         <select id="cliItem" onchange="atualizarSabores()" required>
                             <option value="" disabled selected>Selecione o produto</option>
                             <option value="Bolo">Bolo (R$ 14,00)</option>
-                            <option value="Brigadeiro">Brigadeiro (R$ 10,00)</option>
-                            <option value="Pavê">Pavê (R$ 12,00)</option>
+                            <option value="Brigadeiro">Brigadeiro (Esgotado) (R$ 10,00)</option>
+                            <option value="Pavê">Pavê (Esgotado) (R$ 12,00)</option>
                         </select>
                     </div>
                     <div class="input-group">
@@ -523,7 +523,7 @@
             let saboresDisponiveis = [];
 
             if (itemSelect === 'Bolo') {
-                saboresDisponiveis = ['Chocolate', 'Ninho', 'Prestígio - (Esgotado)', 'Sensação - (Esgotado)', 'Cenoura - (Esgotado)'];
+                saboresDisponiveis = ['Chocolate', 'Ninho', 'Prestígio - Esgotado', 'Sensação - Esgotado', 'Cenoura - Esgotado'];
             } else if (itemSelect === 'Brigadeiro') {
                 saboresDisponiveis = ['Chocolate', 'Oreo', 'Ninho'];
             } else if (itemSelect === 'Pavê') {
