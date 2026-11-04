@@ -122,6 +122,30 @@
 </head>
 <body>
 
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCCzeVUvlBvv8ZaXl7qbqpwdAyyH_CM9ao",
+    authDomain: "cakecouture-2cfd0.firebaseapp.com",
+    projectId: "cakecouture-2cfd0",
+    storageBucket: "cakecouture-2cfd0.firebasestorage.app",
+    messagingSenderId: "930409816465",
+    appId: "1:930409816465:web:78a7631f059103184d7a30",
+    measurementId: "G-YHHQ2W9B6X"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+    
     <div class="login-card">
         <div class="logo-area">🍰 Cake Couture</div>
         <div class="login-subtitle">Entre com suas credenciais para acessar</div>
